@@ -1,0 +1,205 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  role         String    // "INVESTOR", "BUSINESS", "ADMIN"
+  name         String
+  phone        String?
+  country      String?
+  city         String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  investorProfile          InvestorProfile?
+  businessProfile          BusinessProfile?
+  watchlists               Watchlist[]
+  comparisons              Comparison[]
+  sentInformationRequests  InformationRequest[] @relation("InvestorRequests")
+  auditLogs                AuditLog[]
+  adminNotes               AdminNote[]
+}
+
+model InvestorProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  experienceLevel     String   @default("INTERMEDIATE") // "BEGINNER", "INTERMEDIATE", "EXPERIENCED"
+  bio                 String?
+  onboardingCompleted Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  preferences         InvestorPreference?
+}
+
+model InvestorPreference {
+  id                      String          @id @default(cuid())
+  investorProfileId       String          @unique
+  investorProfile         InvestorProfile @relation(fields: [investorProfileId], references: [id], onDelete: Cascade)
+  minInvestment           Float           @default(100000)
+  maxInvestment           Float           @default(5000000)
+  industries              String          @default("[]") // JSON string: ["Technology", "AI", "Healthcare", ...]
+  geographies             String          @default("[]") // JSON string: ["India", "Southeast Asia", ...]
+  horizons                String          @default("[]") // JSON string: ["<1 year", "1–3 years", "3–5 years", "5+ years"]
+  riskTolerance           String          @default("MODERATE") // "LOWER", "MODERATE", "HIGHER"
+  stages                  String          @default("[]") // JSON string: ["Pre-seed", "Seed", "Early Stage", "Growth"]
+  revenuePreference       String          @default("ANY") // "ANY", "REVENUE_GENERATING", "PRE_REVENUE"
+  profitabilityPreference String          @default("ANY") // "ANY", "PROFITABLE", "PATH_TO_PROFITABILITY"
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+}
+
+model BusinessProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName         String
+  founderName         String
+  email               String
+  phone               String?
+  website             String?
+  country             String
+  city                String
+  industry            String
+  businessStage       String   // "Pre-seed", "Seed", "Early Stage", "Growth", "Expansion", "Mature"
+  yearsOperating      Float    @default(1)
+  teamSize            Int      @default(1)
+  businessDescription String
+  problem             String
+  solution            String
+  businessModel       String
+  customerTraction    String?
+  revenueStatus       String   // "Pre-revenue", "₹1L - ₹10L/mo", "₹10L - ₹50L/mo", "₹50L+/mo", "Undisclosed"
+  revenueDetails      String?  // Source-verified note e.g. "Self-reported: ₹32L FY25"
+  profitabilityStatus String   // "Profitable", "Near Break-even", "Loss-making", "Early Stage"
+  fundingRequirement  Float    // In local currency units e.g. 2500000
+  intendedUseOfFunds  String
+  previousFunding     String?  // "Bootstrapped", "Angel ₹10L", etc.
+  status              String   @default("DRAFT") // "DRAFT", "SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED", "NEEDS_INFO"
+  verificationStatus  String   @default("NOT_REVIEWED") // "NOT_REVIEWED", "UNDER_REVIEW", "VERIFIED", "NEEDS_INFO", "REJECTED"
+  verificationNotes   String?
+  verifiedAt          DateTime?
+  isPublished         Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  documents           OpportunityDocument[]
+  watchlists          Watchlist[]
+  informationRequests InformationRequest[]
+  riskFlags           RiskFlag[]
+  adminNotes          AdminNote[]
+}
+
+model OpportunityDocument {
+  id                 String          @id @default(cuid())
+  businessProfileId  String
+  businessProfile    BusinessProfile @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+  title              String
+  docType            String          // "PITCH_DECK", "FINANCIALS", "BUSINESS_PLAN", "REGISTRATION", "OTHER"
+  fileUrl            String
+  fileSize           String?
+  verificationStatus String          @default("PENDING") // "PENDING", "VERIFIED", "REJECTED"
+  sourceClaim        String?         // E.g., "Founder uploaded certified document"
+  createdAt          DateTime        @default(now())
+}
+
+model Watchlist {
+  id                String          @id @default(cuid())
+  userId            String
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessProfileId String
+  businessProfile   BusinessProfile @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+  privateNotes      String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([userId, businessProfileId])
+}
+
+model Comparison {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title              String   @default("Opportunity Comparison")
+  businessProfileIds String   // JSON array of strings e.g. "[\"id1\", \"id2\"]"
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model InformationRequest {
+  id                String          @id @default(cuid())
+  investorUserId    String
+  investorUser      User            @relation("InvestorRequests", fields: [investorUserId], references: [id], onDelete: Cascade)
+  businessProfileId String
+  businessProfile   BusinessProfile @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+  subject           String
+  message           String
+  status            String          @default("PENDING") // "PENDING", "RESPONDED", "CLOSED"
+  businessReply     String?
+  repliedAt         DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model RiskFlag {
+  id                String          @id @default(cuid())
+  businessProfileId String
+  businessProfile   BusinessProfile @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+  category          String          // "MARKET", "REGULATORY", "FINANCIAL", "OPERATIONAL", "EARLY_STAGE"
+  severity          String          @default("MEDIUM") // "LOW", "MEDIUM", "HIGH"
+  description       String
+  isPublic          Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+}
+
+model AdminNote {
+  id                String          @id @default(cuid())
+  businessProfileId String
+  businessProfile   BusinessProfile @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+  authorId          String
+  author            User            @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  note              String
+  createdAt         DateTime        @default(now())
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  adminId       String
+  admin         User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
+  action        String   // "APPROVE_OPPORTUNITY", "VERIFY_METRIC", "UPDATE_STATUS", "CHANGE_WEIGHTS", "ADD_RISK_FLAG"
+  entityType    String   // "BUSINESS_PROFILE", "DOCUMENT", "CONFIG", "USER"
+  entityId      String
+  previousValue String?  // JSON string
+  newValue      String?  // JSON string
+  ipAddress     String?
+  timestamp     DateTime @default(now())
+}
+
+model MatchingConfig {
+  id             String   @id @default("default-config")
+  industryWeight Float    @default(0.25)
+  amountWeight   Float    @default(0.20)
+  stageWeight    Float    @default(0.15)
+  geoWeight      Float    @default(0.10)
+  horizonWeight  Float    @default(0.15)
+  riskWeight     Float    @default(0.15)
+  updatedAt      DateTime @updatedAt
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  eventType String   // "REGISTRATION", "ONBOARDING_COMPLETE", "BUSINESS_SUBMISSION", "OPPORTUNITY_VIEW", "WATCHLIST_ADD", "COMPARISON_USE", "INFO_REQUEST"
+  userId    String?
+  entityId  String?
+  metadata  String?  // JSON string
+  timestamp DateTime @default(now())
+}

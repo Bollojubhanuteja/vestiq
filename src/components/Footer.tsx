@@ -1,0 +1,144 @@
+import React from 'react';
+import Link from 'next/link';
+import { ShieldCheck, AlertTriangle } from 'lucide-react';
+
+export function Footer() {
+  return (
+    <footer className="bg-slate-900 text-slate-400 border-t border-slate-800 pt-16 pb-12 text-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-800">
+          {/* Brand & Mission */}
+          <div className="lg:col-span-2 space-y-4">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white font-bold text-base">
+                V
+              </div>
+              <span className="text-xl font-bold tracking-tight text-white">VESTIQ</span>
+            </Link>
+            <p className="text-slate-400 leading-relaxed pr-6">
+              Vestiq is an investment opportunity discovery and research platform connecting capital allocators with emerging businesses. We organize research, streamline due diligence inquiries, and calculate transparent preference compatibility scores.
+            </p>
+            <div className="flex items-center gap-2 text-xs text-slate-500 pt-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>Deterministic Rule-Based Matching • Source-Audited Metrics</span>
+            </div>
+          </div>
+
+          {/* Column: Platform */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-200 uppercase tracking-wider mb-4">Platform</h4>
+            <ul className="space-y-2.5">
+              <li>
+                <Link href="/explore" className="hover:text-white transition">
+                  Explore Opportunities
+                </Link>
+              </li>
+              <li>
+                <Link href="/how-it-works" className="hover:text-white transition">
+                  How It Works
+                </Link>
+              </li>
+              <li>
+                <Link href="/for-investors" className="hover:text-white transition">
+                  For Investors
+                </Link>
+              </li>
+              <li>
+                <Link href="/for-businesses" className="hover:text-white transition">
+                  For Businesses
+                </Link>
+              </li>
+              <li>
+                <Link href="/register" className="hover:text-white transition">
+                  Create Account
+                </Link>
+              </li>
+              <li>
+                <Link href="/login" className="hover:text-white transition">
+                  Sign In
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column: Company & Research */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-200 uppercase tracking-wider mb-4">Company</h4>
+            <ul className="space-y-2.5">
+              <li>
+                <Link href="/about" className="hover:text-white transition">
+                  About Vestiq
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-white transition">
+                  Frequently Asked Questions
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-white transition">
+                  Contact &amp; Diligence Help
+                </Link>
+              </li>
+              <li>
+                <Link href="/risk-disclosure" className="hover:text-white transition">
+                  Risk Disclosure
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column: Compliance & Legal */}
+          <div>
+            <h4 className="text-xs font-semibold text-slate-200 uppercase tracking-wider mb-4">Legal &amp; Policy</h4>
+            <ul className="space-y-2.5">
+              <li>
+                <Link href="/terms" className="hover:text-white transition">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="hover:text-white transition">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/risk-disclosure" className="text-amber-400 hover:text-amber-300 transition">
+                  Risk &amp; Non-Brokerage Notice
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Detailed Regulatory / Legal Position Notice */}
+        <div className="py-8 border-b border-slate-800 text-xs text-slate-500 space-y-3">
+          <div className="flex items-start gap-2.5 bg-slate-950 p-4 rounded-xl border border-slate-800/80">
+            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <div className="space-y-1.5 leading-relaxed">
+              <p className="font-semibold text-slate-300">
+                Important Regulatory &amp; Non-Intermediary Notice:
+              </p>
+              <p>
+                Vestiq is strictly an informational discovery, research, and opportunity-management software platform. Vestiq does NOT handle customer capital, accept investor deposits, execute or clear investment transactions, or hold custody of funds. Vestiq is NOT a registered broker-dealer, investment advisor, crowdfunding portal, or regulated financial intermediary.
+              </p>
+              <p>
+                All company information and financial metrics displayed on Vestiq are provided by the respective business submitters and reviewed for basic verification criteria. Past performance and self-reported metrics are not indicators of future profitability. Investment in early-stage, growth, or private enterprises involves significant risk, including complete loss of capital, illiquidity, and lack of secondary market transferability. Investors must conduct independent commercial, financial, and legal due diligence before entering into any private investment agreements outside the platform.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom copyright */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+          <p>© {new Date().getFullYear()} Vestiq Platforms. All rights reserved. Platform Version 1.0 (MVP).</p>
+          <div className="flex items-center gap-6">
+            <Link href="/terms" className="hover:text-slate-400">Terms</Link>
+            <Link href="/privacy" className="hover:text-slate-400">Privacy</Link>
+            <Link href="/risk-disclosure" className="hover:text-slate-400">Disclosures</Link>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}

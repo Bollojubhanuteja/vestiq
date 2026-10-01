@@ -1,0 +1,44 @@
+{
+  "name": "vestiq",
+  "version": "1.0.0",
+  "description": "Vestiq - Investment Opportunity Discovery and Research Platform",
+  "main": "index.js",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "seed": "node prisma/seed.js",
+    "test": "node scripts/test-runner.js"
+  },
+  "keywords": [
+    "investment-research",
+    "opportunity-discovery",
+    "dealflow",
+    "fintech"
+  ],
+  "author": "Vestiq Team",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@prisma/client": "5.22.0",
+    "autoprefixer": "^10.6.1",
+    "bcryptjs": "^3.0.3",
+    "clsx": "^2.1.1",
+    "jose": "^6.2.12",
+    "lucide-react": "^1.48.0",
+    "next": "^14.2.15",
+    "postcss": "^8.5.28",
+    "prisma": "5.22.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^3.7.0",
+    "tailwindcss": "^3.4.14",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^26.6.3",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.6.3"
+  }
+}
