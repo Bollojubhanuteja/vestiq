@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { db } from '@/lib/db';
 import { OpportunityCard, OpportunityCardData } from '@/components/OpportunityCard';
+import { ThesisMatcherWidget } from '@/components/ThesisMatcherWidget';
 import {
   Compass,
   Search,
@@ -109,6 +110,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Interactive Thesis Matcher & Founder Readiness Engine */}
+      <ThesisMatcherWidget />
 
       {/* How It Works Section */}
       <section className="py-20 bg-white border-b border-slate-200">
