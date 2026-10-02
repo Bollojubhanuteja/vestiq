@@ -182,11 +182,29 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {featured.map((opp) => (
-              <OpportunityCard key={opp.id} opportunity={opp} />
-            ))}
-          </div>
+          {featured.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {featured.map((opp) => (
+                <OpportunityCard key={opp.id} opportunity={opp} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 px-6 rounded-2xl bg-white border border-slate-200 shadow-sm max-w-xl mx-auto">
+              <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+                <Briefcase className="w-6 h-6" />
+              </div>
+              <h4 className="text-base font-bold text-slate-900 mb-1">Opportunities Queue is Open</h4>
+              <p className="text-xs text-slate-600 mb-5 max-w-md mx-auto">
+                All demo data has been cleaned. The platform is ready for live business submissions and verified investor diligence inquiries.
+              </p>
+              <Link
+                href="/register?role=BUSINESS"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition"
+              >
+                Submit Your Startup Listing &rarr;
+              </Link>
+            </div>
+          )}
 
           <div className="mt-10 text-center">
             <Link
