@@ -21,7 +21,7 @@ const SAMPLE_OPPORTUNITIES: OpportunityPreview[] = [
     industry: 'Technology',
     stage: 'Seed',
     city: 'Gurugram',
-    funding: 450000,
+    funding: 7500000,
     highlight: '28% MoM MRR growth, 118% Net Revenue Retention, verified ARR.',
   },
   {
@@ -30,7 +30,7 @@ const SAMPLE_OPPORTUNITIES: OpportunityPreview[] = [
     industry: 'AgriTech',
     stage: 'Early Traction',
     city: 'Pune',
-    funding: 600000,
+    funding: 15000000,
     highlight: '14,000+ active farmers, 3x revenue expansion, zero toxic dead equity.',
   },
   {
@@ -39,7 +39,7 @@ const SAMPLE_OPPORTUNITIES: OpportunityPreview[] = [
     industry: 'CleanTech',
     stage: 'Growth',
     city: 'Bengaluru',
-    funding: 1200000,
+    funding: 30000000,
     highlight: 'Patent-pending micro-inverter efficiency, 18 months runway.',
   },
   {
@@ -48,20 +48,41 @@ const SAMPLE_OPPORTUNITIES: OpportunityPreview[] = [
     industry: 'FinTech',
     stage: 'Seed',
     city: 'Mumbai',
-    funding: 750000,
+    funding: 10000000,
     highlight: 'Real-time SME treasury management, audited banking logs.',
   },
 ];
 
+function formatCheckSize(val: number): string {
+  if (val >= 10000000) {
+    const cr = val / 10000000;
+    return `₹${cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(1)} Cr`;
+  }
+  const l = val / 100000;
+  return `₹${l % 1 === 0 ? l.toFixed(0) : l.toFixed(1)} Lakhs`;
+}
+
+function formatMRR(val: number): string {
+  if (val >= 10000000) {
+    const cr = val / 10000000;
+    return `₹${cr % 1 === 0 ? cr.toFixed(0) : cr.toFixed(1)} Cr`;
+  }
+  if (val >= 100000) {
+    const l = val / 100000;
+    return `₹${l % 1 === 0 ? l.toFixed(0) : l.toFixed(1)} Lakhs`;
+  }
+  return `₹${(val / 1000).toFixed(0)}k`;
+}
+
 export function ThesisMatcherWidget() {
   const [selectedIndustry, setSelectedIndustry] = useState<string>('Technology');
-  const [selectedCheckSize, setSelectedCheckSize] = useState<number>(35000);
+  const [selectedCheckSize, setSelectedCheckSize] = useState<number>(2500000);
   const [selectedStage, setSelectedStage] = useState<string>('Seed');
   const [selectedRisk, setSelectedRisk] = useState<string>('Moderate');
   const [mode, setMode] = useState<'investor' | 'founder'>('investor');
 
   // Founder mode state
-  const [founderMrr, setFounderMrr] = useState<number>(25000);
+  const [founderMrr, setFounderMrr] = useState<number>(300000);
   const [founderGrowth, setFounderGrowth] = useState<number>(20);
   const [founderRunway, setFounderRunway] = useState<number>(12);
 
@@ -75,7 +96,7 @@ export function ThesisMatcherWidget() {
     // Calculate score component
     let industryScore = candidate.industry.toLowerCase() === selectedIndustry.toLowerCase() ? 30 : 15;
     let stageScore = candidate.stage.toLowerCase() === selectedStage.toLowerCase() ? 25 : 15;
-    let checkScore = selectedCheckSize >= 25000 && selectedCheckSize <= 100000 ? 25 : 15;
+    let checkScore = selectedCheckSize >= 500000 && selectedCheckSize <= 5000000 ? 25 : 16;
     let riskScore = selectedRisk === 'Moderate' ? 14 : 10;
 
     const totalScore = Math.min(98, Math.max(62, industryScore + stageScore + checkScore + riskScore));
@@ -91,8 +112,8 @@ export function ThesisMatcherWidget() {
   // Founder readiness score
   const founderReadinessScore = useMemo(() => {
     let score = 50;
-    if (founderMrr > 15000) score += 15;
-    if (founderMrr > 50000) score += 10;
+    if (founderMrr >= 200000) score += 15;
+    if (founderMrr >= 1000000) score += 10;
     if (founderGrowth >= 15) score += 15;
     if (founderGrowth >= 25) score += 5;
     if (founderRunway >= 9) score += 10;
@@ -184,22 +205,22 @@ export function ThesisMatcherWidget() {
                       2. Your Target Check Size
                     </label>
                     <span className="font-mono text-cyan-400 font-bold text-sm bg-cyan-950/60 border border-cyan-800/60 px-2.5 py-0.5 rounded-lg">
-                      ${selectedCheckSize.toLocaleString()}
+                      {formatCheckSize(selectedCheckSize)}
                     </span>
                   </div>
                   <input
                     type="range"
-                    min="10000"
-                    max="150000"
-                    step="5000"
+                    min="200000"
+                    max="10000000"
+                    step="100000"
                     value={selectedCheckSize}
                     onChange={e => setSelectedCheckSize(Number(e.target.value))}
                     className="w-full accent-cyan-400 bg-slate-800 h-2 rounded-lg cursor-pointer"
                   />
                   <div className="flex justify-between text-[11px] text-slate-500 mt-1 font-mono">
-                    <span>$10,000 (Micro Angel)</span>
-                    <span>$50,000 (Standard)</span>
-                    <span>$150,000+ (Syndicate)</span>
+                    <span>₹2 Lakhs (Micro Angel)</span>
+                    <span>₹25 Lakhs (Standard)</span>
+                    <span>₹1 Crore+ (Syndicate)</span>
                   </div>
                 </div>
 
@@ -274,6 +295,9 @@ export function ThesisMatcherWidget() {
                       </span>
                       <span className="px-2 py-0.5 rounded bg-slate-800 text-[10px] font-semibold text-slate-300">
                         {matchResult.candidate.stage}
+                      </span>
+                      <span className="px-2 py-0.5 rounded bg-cyan-950/70 border border-cyan-800/60 text-[10px] font-semibold text-cyan-300 font-mono">
+                        {formatCheckSize(matchResult.candidate.funding)} Ask
                       </span>
                     </div>
                   </div>
@@ -388,18 +412,23 @@ export function ThesisMatcherWidget() {
                       Current Monthly Recurring Revenue (MRR)
                     </label>
                     <span className="font-mono text-emerald-400 font-bold text-sm bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-0.5 rounded-lg">
-                      ${founderMrr.toLocaleString()} / mo
+                      {formatMRR(founderMrr)} / mo
                     </span>
                   </div>
                   <input
                     type="range"
-                    min="2000"
-                    max="100000"
-                    step="1000"
+                    min="50000"
+                    max="5000000"
+                    step="50000"
                     value={founderMrr}
                     onChange={e => setFounderMrr(Number(e.target.value))}
                     className="w-full accent-emerald-400 bg-slate-800 h-2 rounded-lg cursor-pointer"
                   />
+                  <div className="flex justify-between text-[11px] text-slate-500 mt-1 font-mono">
+                    <span>₹50k / mo</span>
+                    <span>₹25 Lakhs / mo</span>
+                    <span>₹50 Lakhs / mo</span>
+                  </div>
                 </div>
 
                 {/* MoM Growth Slider */}

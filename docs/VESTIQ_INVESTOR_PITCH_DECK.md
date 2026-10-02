@@ -1,56 +1,57 @@
-# 📊 VESTIQ — Official Pre-Seed Investor Pitch Deck
+# 📊 VESTIQ — Official Pre-Seed Investor Pitch Deck (India Edition)
 
 > **Platform:** Vestiq ([vestiq-nine.vercel.app](https://vestiq-nine.vercel.app))  
 > **Contact:** `vestiq21@gmail.com` | Founder: Bhanu Teja  
-> **Category:** FinTech / Venture Capital Infrastructure / B2B SaaS  
-> **Round:** $350k Pre-Seed  
+> **Category:** FinTech / Venture Intelligence Infrastructure / B2B SaaS  
+> **Target Market:** India Early-Stage Startup Ecosystem (Bengaluru, Mumbai, Delhi-NCR, Hyderabad, Pune, Chennai)  
+> **Round:** ₹2.5 Crores Pre-Seed  
 
 ---
 
 ## Slide 1: Cover & Vision
 * **Title:** Vestiq
-* **Tagline:** The Investment Opportunity Discovery & Diligence Platform for Early-Stage Capital.
+* **Tagline:** The Investment Opportunity Discovery & Diligence Platform for Indian Early-Stage Capital.
 * **Talking Points:**
-  - "Hello, my name is Bhanu Teja, and I am the founder of Vestiq. We are building the intelligence layer for private venture discovery and diligence—connecting high-conviction angel investors and syndicate leads with vetted, early-stage businesses."
+  - "Hello, my name is Bhanu Teja, and I am the founder of Vestiq. We are building the intelligence layer for private venture discovery and diligence in India—connecting high-conviction angel investors and syndicate leads with vetted, DPIIT-registered early-stage businesses."
 
 ---
 
-## Slide 2: The Problem (Early-Stage Deal Flow is 90% Noise)
+## Slide 2: The Problem (Early-Stage Deal Flow in India is 90% Noise)
 * **The Investor Pain:**
-  - Angels and syndicates are drowning in unformatted 40-page PDF pitch decks filled with vanity metrics.
-  - 80% of inbound pitches conflict with check size, sector thesis, or stage criteria.
-  - Due diligence is manual, slow, and scattered across email threads and WhatsApp groups.
+  - Indian angels and syndicates are drowning in unformatted 40-page PDF pitch decks filled with vanity GMV figures.
+  - 80% of inbound pitches conflict with check size (e.g., asking ₹1.5 Cr from a ₹5L angel), sector thesis, or stage criteria.
+  - Due diligence is manual, slow, and scattered across unstructured WhatsApp groups and Google Drive folders.
 * **The Founder Pain:**
-  - Ambitious founders burn 60+ hours pitching angels whose criteria they never matched in the first place.
+  - Ambitious Indian founders burn 60+ hours pitching angels whose mandate they never matched in the first place.
   - Answering the same 20 repetitive diligence questions over and over.
 
 ---
 
 ## Slide 3: The Solution (The Diligence Intelligence Layer)
-* **Deterministic Preference Matching:** Algorithmic alignment scoring based on sector, check size, stage, timeline, and risk tolerance (zero black-box hype).
+* **Deterministic Preference Matching:** Algorithmic alignment scoring based on sector, check size (₹5 Lakhs to ₹1 Crore+), stage, timeline, and risk tolerance (zero black-box hype).
 * **13-Dimension Benchmarking Matrix:** Compare growth rates, unit economics (CAC, NRR, churn), and cap tables side-by-side.
-* **Source-Claim Provenance:** Distinguish between founder self-reported projections and bank/audit verified metrics.
+* **Source-Claim Provenance:** Distinguish between founder self-reported projections and bank/audit/MCA verified metrics.
 
 ---
 
-## Slide 4: Market Size ($1.4T Opportunity)
-* **TAM:** $1.4 Trillion global annual early-stage venture & angel capital deployment.
-* **SAM:** $42 Billion early-stage syndicate deal flow in India and Southeast Asia.
-* **SOM (24 Months):** $18 Million software subscription and diligence verification revenue.
+## Slide 4: Market Size (Indian Venture Opportunity)
+* **TAM:** ₹12 Lakh Crores ($1.4 Trillion) global annual early-stage venture & angel capital deployment.
+* **SAM:** ₹35,000 Crores ($4.2 Billion) early-stage angel and micro-syndicate deal flow in India.
+* **SOM (24 Months):** ₹15 Crores annual recurring software subscription and diligence verification revenue in India.
 
 ---
 
 ## Slide 5: Defensible Regulatory Architecture
-* **Non-Custodial Advantage:** Vestiq does NOT touch customer funds, execute trades, or hold escrow.
-* **Zero Brokerage Liabilities:** No regulatory drag, fast compliance, and multi-country operational flexibility.
+* **Non-Custodial Advantage:** Vestiq does NOT touch investor funds, execute trades, or hold escrow.
+* **SEBI & MCA Compliant:** Strictly structured as an information discovery and diligence research platform. No broker-dealer liabilities.
 * **Pure Software Margins:** ~85% gross margins standard for B2B SaaS.
 
 ---
 
 ## Slide 6: Business & Monetization Model
-* **Tier 1: Investor Pro ($99/mo):** Unlimited discovery, 13-dimension matrix, custom match weighting, direct founder diligence inquiries.
-* **Tier 2: Syndicate & Family Office ($499/mo):** Multi-seat access, diligence tear-sheet exports, deal room collaboration.
-* **Tier 3: Founder Listing & Verification ($199 one-time):** Diligence review, verified listing badge, direct inbound request tracking.
+* **Tier 1: Investor Pro (₹4,999/mo or ₹49,999/yr):** Unlimited discovery, 13-dimension matrix, custom match weighting, direct founder diligence inquiries.
+* **Tier 2: Syndicate & Family Office (₹24,999/mo):** Multi-seat access, diligence tear-sheet exports, deal room collaboration, direct MCA integration.
+* **Tier 3: Founder Listing & Diligence Badge (₹9,999 one-time):** Comprehensive diligence review, verified listing badge, direct inbound request tracking.
 
 ---
 
@@ -63,26 +64,26 @@
 ---
 
 ## Slide 8: Go-To-Market Flywheel
-* **Organic Diligence Content Engine:** 2 daily posts + 2 reels on Instagram and LinkedIn attracting active angels and founders with zero paid CAC.
+* **Organic Diligence Content Engine:** 2 daily posts + 2 reels on Instagram and LinkedIn attracting active Indian angels and founders with zero paid CAC.
 * **Free Discovery Directory:** Lowers friction for angels to experience preference matching.
-* **Network Effects:** Every founder who lists brings their existing angel network onto the platform.
+* **Network Effects:** Every founder who lists brings their existing angel syndicate network onto Vestiq.
 
 ---
 
 ## Slide 9: Competitive Landscape
-* **PitchBook:** $25,000+/year, heavy enterprise terminal, historical data only.
-* **AngelList:** Heavy SPV legal fees, high carry friction, US-centric.
-* **Vestiq:** Accessible SaaS pricing ($99/mo), transparent deterministic matching, real-time 13-dimension diligence matrix.
+* **PitchBook / Tracxn:** ₹20 Lakhs+/year, heavy enterprise terminal, historical backward-looking data.
+* **AngelList / LetsVenture:** Heavy SPV legal fees, high carry friction, rigid syndication structures.
+* **Vestiq:** Accessible SaaS pricing (₹4,999/mo), transparent deterministic matching, real-time 13-dimension diligence matrix tailored specifically for the Indian venture ecosystem.
 
 ---
 
 ## Slide 10: The Ask & Milestones
-* **Raising:** $350k Pre-Seed on a standard SAFE or convertible note.
+* **Raising:** ₹2.5 Crores Pre-Seed on standard iSAFE or convertible note.
 * **Use of Funds:**
-  - 50% Product & Engineering (Automated financial diligence connectors)
-  - 30% Founder & Angel Community Growth
-  - 20% Legal Compliance & Platform Operations
+  - 50% Product & Engineering (Automated Indian diligence connectors: GSTN, MCA-21, bank verification)
+  - 30% Founder & Angel Community Growth across Tier 1 & Tier 2 Indian startup hubs
+  - 20% Legal Compliance, Security Audits & Platform Operations
 * **12-Month Targets:**
-  - 500+ Verified Seed Startups
+  - 500+ Verified Seed Startups across India
   - 1,200 Active Angels & Syndicates
-  - $45k MRR ($540k ARR run-rate)
+  - ₹35 Lakhs MRR (~₹4.2 Crores ARR run-rate)

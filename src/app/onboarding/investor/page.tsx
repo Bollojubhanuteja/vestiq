@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   ShieldAlert,
   Sliders,
-  DollarSign,
+  IndianRupee,
   AlertCircle,
   Building2,
   Clock,

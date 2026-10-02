@@ -77,6 +77,21 @@ async function main() {
   });
 
   console.log('✓ Created official Admin account for vestiq21@gmail.com');
+
+  // VACUUM database to wipe tombstoned pages and shrink file
+  await db.$executeRawUnsafe('VACUUM;');
+  console.log('✓ SQLite database VACUUMED cleanly.');
+
+  // Synchronize src/lib/initial-db.ts for Vercel serverless /tmp
+  const dbPath = path.join(process.cwd(), 'prisma', 'dev.db');
+  if (fs.existsSync(dbPath)) {
+    const dbBuf = fs.readFileSync(dbPath);
+    const b64 = dbBuf.toString('base64');
+    const outPath = path.join(process.cwd(), 'src', 'lib', 'initial-db.ts');
+    fs.writeFileSync(outPath, `export const INITIAL_DB_BASE64 = '${b64}';\n`);
+    console.log(`✓ Synchronized src/lib/initial-db.ts (${b64.length} chars).`);
+  }
+
   console.log('--- Database is now 100% clean and ready for real users! ---');
 }
 

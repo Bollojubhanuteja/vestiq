@@ -1,7 +1,7 @@
 /**
  * Vestiq Automated Test Suite
  * Tests:
- * 1. Matching Engine calculation & transparent breakdown
+ * 1. Matching Engine calculation & transparent breakdown (INR Lakhs & Crores)
  * 2. Investor Registration & Profile isolation
  * 3. Business Profile Creation & Private Status
  * 4. Admin Approval & Public Discoverability
@@ -41,9 +41,9 @@ function calculatePreferenceMatch(preferences, business, weights) {
   else if (userIndustries.some(i => i.toLowerCase() === business.industry.toLowerCase())) industryScore = 1.0;
   else industryScore = 0.1;
 
-  // 2. Amount
-  const minInv = preferences.minInvestment ?? 50000;
-  const maxInv = preferences.maxInvestment ?? 5000000;
+  // 2. Amount (INR)
+  const minInv = preferences.minInvestment ?? 500000;
+  const maxInv = preferences.maxInvestment ?? 10000000;
   const fundingReq = business.fundingRequirement;
   let amtScore = 0;
   if (fundingReq >= minInv && fundingReq <= maxInv * 2) amtScore = 1.0;
@@ -86,6 +86,8 @@ async function runTests() {
 
   let passed = 0;
   let failed = 0;
+  const cleanupUserIds = [];
+  const cleanupBusinessIds = [];
 
   function assert(condition, testName) {
     if (condition) {
@@ -101,7 +103,7 @@ async function runTests() {
     // ----------------------------------------------------
     // TEST 1: Matching Engine Deterministic Calculation
     // ----------------------------------------------------
-    console.log('TEST SUITE 1: Matching Engine');
+    console.log('TEST SUITE 1: Matching Engine (Indian Rupee Denominations)');
     const weights = {
       industryWeight: 0.25,
       amountWeight: 0.20,
@@ -112,8 +114,8 @@ async function runTests() {
     };
 
     const investorA_prefs = {
-      minInvestment: 500000,
-      maxInvestment: 5000000,
+      minInvestment: 500000, // ₹5 Lakhs
+      maxInvestment: 5000000, // ₹50 Lakhs
       industries: ['Agriculture'],
       geographies: ['India'],
       stages: ['Growth'],
@@ -121,7 +123,7 @@ async function runTests() {
 
     const agritechBiz = {
       industry: 'Agriculture',
-      fundingRequirement: 2500000,
+      fundingRequirement: 2500000, // ₹25 Lakhs
       businessStage: 'Growth',
       country: 'India',
     };
@@ -131,7 +133,7 @@ async function runTests() {
 
     const misalignedBiz = {
       industry: 'Fashion',
-      fundingRequirement: 80000000,
+      fundingRequirement: 80000000, // ₹8 Crores
       businessStage: 'Pre-seed',
       country: 'Brazil',
     };
@@ -143,37 +145,78 @@ async function runTests() {
     // TEST 2: RBAC - Investor Data Isolation
     // ----------------------------------------------------
     console.log('\nTEST SUITE 2: RBAC & Private Data Isolation');
-    const invUser1 = await db.user.findFirst({ where: { email: 'investor@vestiq.com' } });
-    assert(!!invUser1, 'Demo Investor User exists in database');
+    const pwdHash = await bcrypt.hash('TestPassword123!', 10);
 
-    // Create a temporary second investor
-    const tempEmail = `test-inv-${Date.now()}@vestiq.com`;
-    const tempPasswordHash = await bcrypt.hash('Password123!', 10);
+    // Create ephemeral investor 1
+    const invUser1 = await db.user.create({
+      data: {
+        email: `test-inv1-${Date.now()}@test.vestiq.in`,
+        passwordHash: pwdHash,
+        role: 'INVESTOR',
+        name: 'Test Investor 1',
+        country: 'India',
+        city: 'Mumbai',
+      },
+    });
+    cleanupUserIds.push(invUser1.id);
+    assert(!!invUser1, 'Ephemeral Test Investor 1 created successfully');
+
+    // Create ephemeral investor 2
     const invUser2 = await db.user.create({
       data: {
-        email: tempEmail,
-        passwordHash: tempPasswordHash,
+        email: `test-inv2-${Date.now()}@test.vestiq.in`,
+        passwordHash: pwdHash,
         role: 'INVESTOR',
-        name: 'Temporary Investor B',
+        name: 'Test Investor 2',
         country: 'India',
+        city: 'Bengaluru',
       },
     });
+    cleanupUserIds.push(invUser2.id);
 
-    const inv2Profile = await db.investorProfile.create({
+    // Create ephemeral business founder & business
+    const bizFounder = await db.user.create({
       data: {
-        userId: invUser2.id,
-        experienceLevel: 'BEGINNER',
-        onboardingCompleted: true,
+        email: `test-founder-${Date.now()}@test.vestiq.in`,
+        passwordHash: pwdHash,
+        role: 'BUSINESS',
+        name: 'Test Founder',
+        country: 'India',
+        city: 'Hyderabad',
       },
     });
+    cleanupUserIds.push(bizFounder.id);
+
+    const testBiz = await db.businessProfile.create({
+      data: {
+        userId: bizFounder.id,
+        companyName: 'Test Ephemeral Ventures Pvt Ltd',
+        founderName: 'Test Founder',
+        email: bizFounder.email,
+        country: 'India',
+        city: 'Hyderabad',
+        industry: 'Technology',
+        businessStage: 'Seed',
+        businessDescription: 'Testing platform data isolation and workflows.',
+        problem: 'Testing problem isolation.',
+        solution: 'Testing solution isolation.',
+        businessModel: 'B2B SaaS in INR.',
+        revenueStatus: 'PRE_REVENUE',
+        profitabilityStatus: 'PRE_PROFITABLE',
+        fundingRequirement: 5000000, // ₹50 Lakhs
+        intendedUseOfFunds: 'R&D',
+        status: 'UNDER_REVIEW',
+        isPublished: false,
+      },
+    });
+    cleanupBusinessIds.push(testBiz.id);
 
     // Save a private watchlist item with confidential note for Investor 2
-    const bizSample = await db.businessProfile.findFirst();
     const wlItem = await db.watchlist.create({
       data: {
         userId: invUser2.id,
-        businessProfileId: bizSample.id,
-        privateNotes: 'TOP SECRET: Planning ₹10L angel syndicate offer.',
+        businessProfileId: testBiz.id,
+        privateNotes: 'TOP SECRET: Planning ₹25L angel syndicate check.',
       },
     });
 
@@ -184,58 +227,81 @@ async function runTests() {
     const leak = inv1Watchlist.some(w => w.userId === invUser2.id || w.privateNotes?.includes('TOP SECRET'));
     assert(!leak, "CRITICAL: Investor A cannot access Investor B's private watchlist data");
 
-    // Clean up temporary watchlist & user
+    // Clean up temporary watchlist
     await db.watchlist.delete({ where: { id: wlItem.id } });
-    await db.investorProfile.delete({ where: { id: inv2Profile.id } });
-    await db.user.delete({ where: { id: invUser2.id } });
 
     // ----------------------------------------------------
     // TEST 3: Business Ownership Isolation
     // ----------------------------------------------------
     console.log('\nTEST SUITE 3: Business Profile & Ownership Isolation');
-    const bizProfiles = await db.businessProfile.findMany({ take: 2 });
-    if (bizProfiles.length >= 2) {
-      const bizA = bizProfiles[0];
-      const bizB = bizProfiles[1];
-      assert(bizA.userId !== bizB.userId, 'Two distinct businesses have separate owner userIds');
+    const founder2 = await db.user.create({
+      data: {
+        email: `test-founder2-${Date.now()}@test.vestiq.in`,
+        passwordHash: pwdHash,
+        role: 'BUSINESS',
+        name: 'Test Founder 2',
+        country: 'India',
+        city: 'Pune',
+      },
+    });
+    cleanupUserIds.push(founder2.id);
 
-      // Check ownership helper logic
-      const isOwnerA_of_B = bizA.userId === bizB.userId;
-      assert(!isOwnerA_of_B, 'CRITICAL: Founder A cannot modify Founder B profile');
-    }
+    const testBiz2 = await db.businessProfile.create({
+      data: {
+        userId: founder2.id,
+        companyName: 'Test Company 2 Pvt Ltd',
+        founderName: 'Test Founder 2',
+        email: founder2.email,
+        country: 'India',
+        city: 'Pune',
+        industry: 'FinTech',
+        businessStage: 'Growth',
+        businessDescription: 'Second test business profile.',
+        problem: 'Problem description.',
+        solution: 'Solution description.',
+        businessModel: 'SaaS',
+        revenueStatus: 'REVENUE_GENERATING',
+        profitabilityStatus: 'PROFITABLE',
+        fundingRequirement: 10000000, // ₹1 Crore
+        intendedUseOfFunds: 'Expansion',
+        status: 'APPROVED',
+        isPublished: true,
+      },
+    });
+    cleanupBusinessIds.push(testBiz2.id);
+
+    assert(testBiz.userId !== testBiz2.userId, 'Two distinct businesses have separate owner userIds');
+    const isOwnerA_of_B = testBiz.userId === testBiz2.userId;
+    assert(!isOwnerA_of_B, 'CRITICAL: Founder A cannot modify Founder B profile');
 
     // ----------------------------------------------------
     // TEST 4: Public Visibility Control (Unapproved Profiles Hidden)
     // ----------------------------------------------------
     console.log('\nTEST SUITE 4: Public Visibility & Approval Guard');
-    const privateBiz = await db.businessProfile.findFirst({
-      where: { status: 'UNDER_REVIEW', isPublished: false },
-    });
-
-    assert(!!privateBiz, 'Unapproved opportunity exists in database');
-
-    // Simulate public query
     const publicOpps = await db.businessProfile.findMany({
       where: { status: 'APPROVED', isPublished: true },
     });
 
-    const isPrivateVisible = publicOpps.some(o => o.id === privateBiz?.id);
+    const isPrivateVisible = publicOpps.some(o => o.id === testBiz.id);
     assert(!isPrivateVisible, 'CRITICAL: Unapproved opportunity CANNOT appear in public discovery');
+
+    const isPublicVisible = publicOpps.some(o => o.id === testBiz2.id);
+    assert(isPublicVisible, 'Approved and published opportunity is discoverable');
 
     // ----------------------------------------------------
     // TEST 5: Admin Approval & Audit Logging
     // ----------------------------------------------------
     console.log('\nTEST SUITE 5: Admin Audit Logging & Approval');
     const adminUser = await db.user.findFirst({ where: { role: 'ADMIN' } });
-    assert(!!adminUser, 'Admin user exists in database');
+    assert(!!adminUser, 'Admin user (vestiq21@gmail.com) exists in database');
 
     const auditCountBefore = await db.auditLog.count();
     const testAudit = await db.auditLog.create({
       data: {
-        adminId: adminUser.id,
+        adminId: adminUser ? adminUser.id : invUser1.id,
         action: 'VERIFY_TEST_RUNNER',
         entityType: 'BUSINESS_PROFILE',
-        entityId: 'test-entity-id',
+        entityId: testBiz.id,
         previousValue: JSON.stringify({ status: 'UNDER_REVIEW' }),
         newValue: JSON.stringify({ status: 'APPROVED' }),
         ipAddress: '127.0.0.1',
@@ -250,19 +316,30 @@ async function runTests() {
     // TEST 6: Information Request Workflow
     // ----------------------------------------------------
     console.log('\nTEST SUITE 6: Information Requests Workflow');
-    const existingReq = await db.informationRequest.findFirst({
-      include: { businessProfile: true },
+    const testReq = await db.informationRequest.create({
+      data: {
+        investorUserId: invUser1.id,
+        businessProfileId: testBiz2.id,
+        subject: 'Cap Table Diligence Request',
+        message: 'Requesting verified cap table and MCA certificate for diligence.',
+        status: 'PENDING',
+      },
     });
-    assert(!!existingReq, 'Information request exists in system');
-    assert(
-      existingReq.status === 'PENDING' || existingReq.status === 'RESPONDED',
-      `Information request has valid status: ${existingReq?.status}`
-    );
+
+    assert(testReq.status === 'PENDING', 'Information request created with PENDING status');
+    await db.informationRequest.delete({ where: { id: testReq.id } });
 
   } catch (error) {
     console.error('Test execution error:', error);
     failed++;
   } finally {
+    // Clean up all ephemeral test fixtures
+    for (const bId of cleanupBusinessIds) {
+      await db.businessProfile.deleteMany({ where: { id: bId } });
+    }
+    for (const uId of cleanupUserIds) {
+      await db.user.deleteMany({ where: { id: uId } });
+    }
     await db.$disconnect();
   }
 

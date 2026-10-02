@@ -12,7 +12,7 @@ import {
   ShieldCheck,
   AlertTriangle,
   FileText,
-  DollarSign,
+  IndianRupee,
   TrendingUp,
   Bookmark,
   Scale,
