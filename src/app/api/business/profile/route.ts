@@ -60,6 +60,22 @@ export async function POST(req: NextRequest) {
       fundingRequirement: parseFloat(body.fundingRequirement) || 1000000,
       intendedUseOfFunds: body.intendedUseOfFunds || '',
       previousFunding: body.previousFunding || '',
+      // Investment Model & Structure Fields
+      investmentModel: body.investmentModel || 'EQUITY',
+      minimumInvestment: body.minimumInvestment !== undefined ? parseFloat(body.minimumInvestment) : 200000,
+      proposedReturnRate: body.proposedReturnRate !== undefined && body.proposedReturnRate !== null && body.proposedReturnRate !== '' ? parseFloat(body.proposedReturnRate) : null,
+      investmentTenureMonths: body.investmentTenureMonths !== undefined && body.investmentTenureMonths !== null && body.investmentTenureMonths !== '' ? parseInt(body.investmentTenureMonths) : null,
+      expectedRepaymentAmount: body.expectedRepaymentAmount !== undefined && body.expectedRepaymentAmount !== null && body.expectedRepaymentAmount !== '' ? parseFloat(body.expectedRepaymentAmount) : null,
+      repaymentFrequency: body.repaymentFrequency || (body.investmentModel === 'FIXED_RETURN' ? 'MONTHLY' : null),
+      collateralDetails: body.collateralDetails || null,
+      valuation: body.valuation !== undefined && body.valuation !== null && body.valuation !== '' ? parseFloat(body.valuation) : null,
+      equityOffered: body.equityOffered !== undefined && body.equityOffered !== null && body.equityOffered !== '' ? parseFloat(body.equityOffered) : null,
+      preMoneyValuation: body.preMoneyValuation !== undefined && body.preMoneyValuation !== null && body.preMoneyValuation !== '' ? parseFloat(body.preMoneyValuation) : null,
+      postMoneyValuation: body.postMoneyValuation !== undefined && body.postMoneyValuation !== null && body.postMoneyValuation !== '' ? parseFloat(body.postMoneyValuation) : null,
+      investorOwnershipPercentage: body.investorOwnershipPercentage !== undefined && body.investorOwnershipPercentage !== null && body.investorOwnershipPercentage !== '' ? parseFloat(body.investorOwnershipPercentage) : null,
+      investorRights: body.investorRights || null,
+      growthMetrics: body.growthMetrics || null,
+      riskLevel: body.riskLevel || 'MODERATE',
     };
 
     let profile;

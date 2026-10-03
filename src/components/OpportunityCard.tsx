@@ -13,10 +13,15 @@ import {
   ArrowRight,
   AlertCircle,
   FileCheck,
-  Check
+  Percent,
+  Check,
+  Send,
+  Zap,
+  Lock
 } from 'lucide-react';
 import { MatchScoreBadge } from './MatchScoreBadge';
 import { FactorBreakdown } from '@/lib/matching';
+import { ExpressInterestModal } from './ExpressInterestModal';
 
 export interface OpportunityCardData {
   id: string;
@@ -37,6 +42,22 @@ export interface OpportunityCardData {
   matchSummary?: string;
   riskFlags?: Array<{ category: string; description: string; severity: string }>;
   isSaved?: boolean;
+  // B2B Investment Models Fields
+  investmentModel?: string; // "FIXED_RETURN" or "EQUITY"
+  minimumInvestment?: number;
+  proposedReturnRate?: number | null;
+  investmentTenureMonths?: number | null;
+  expectedRepaymentAmount?: number | null;
+  repaymentFrequency?: string | null;
+  collateralDetails?: string | null;
+  valuation?: number | null;
+  equityOffered?: number | null;
+  preMoneyValuation?: number | null;
+  postMoneyValuation?: number | null;
+  investorRights?: string | null;
+  growthMetrics?: string | null;
+  riskLevel?: string;
+  agreementStatus?: string;
 }
 
 interface OpportunityCardProps {
@@ -54,6 +75,9 @@ export function OpportunityCard({
 }: OpportunityCardProps) {
   const [saved, setSaved] = useState(opportunity.isSaved || false);
   const [saving, setSaving] = useState(false);
+  const [showInterestModal, setShowInterestModal] = useState(false);
+
+  const isFixedReturn = opportunity.investmentModel === 'FIXED_RETURN';
 
   const handleWatchlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -86,138 +110,207 @@ export function OpportunityCard({
   const isVerified = opportunity.verificationStatus === 'VERIFIED';
   const isUnderReview = opportunity.verificationStatus === 'UNDER_REVIEW';
 
+  // Indian Rupee Short Formatter
+  const formatINR = (val?: number | null) => {
+    if (!val) return '₹0';
+    if (val >= 10000000) return `₹${(val / 10000000).toFixed(val % 10000000 === 0 ? 0 : 2)} Cr`;
+    if (val >= 100000) return `₹${(val / 100000).toFixed(val % 100000 === 0 ? 0 : 1)} L`;
+    return `₹${val.toLocaleString('en-IN')}`;
+  };
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 hover:border-blue-300 card-hover p-6 flex flex-col justify-between relative shadow-sm">
-      {/* Top Header: Industry, Match Score, Actions */}
-      <div>
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700">
-              {opportunity.industry}
-            </span>
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-              {opportunity.businessStage}
-            </span>
+    <>
+      <div className="bg-white rounded-2xl border border-slate-200/90 hover:border-blue-400 hover:shadow-lg transition-all duration-200 p-6 flex flex-col justify-between relative group">
+        {/* Model Badge Bar */}
+        <div>
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {isFixedReturn ? (
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200/80 flex items-center gap-1">
+                  <Percent className="w-3 h-3 text-emerald-600" />
+                  Fixed Return: {opportunity.proposedReturnRate || 16}% p.a.
+                </span>
+              ) : (
+                <span className="text-[11px] font-bold px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-800 border border-indigo-200/80 flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3 text-indigo-600" />
+                  Equity: {opportunity.equityOffered || 12}% Pool
+                </span>
+              )}
+
+              <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">
+                {opportunity.industry}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={handleCompareClick}
+                className={`p-1.5 rounded-lg border text-xs transition ${
+                  isCompared
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                }`}
+                title={isCompared ? 'Remove from comparison' : 'Add to side-by-side comparison'}
+              >
+                <Scale className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={handleWatchlistClick}
+                disabled={saving}
+                className={`p-1.5 rounded-lg border text-xs transition ${
+                  saved
+                    ? 'bg-blue-50 text-blue-600 border-blue-200'
+                    : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
+                }`}
+                title={saved ? 'Remove from saved watchlist' : 'Save to private research watchlist'}
+              >
+                <Bookmark className={`w-3.5 h-3.5 ${saved ? 'fill-blue-600' : ''}`} />
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={handleCompareClick}
-              className={`p-1.5 rounded-lg border text-xs transition ${
-                isCompared
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
-              }`}
-              title={isCompared ? 'Remove from comparison' : 'Add to side-by-side comparison'}
-            >
-              <Scale className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={handleWatchlistClick}
-              disabled={saving}
-              className={`p-1.5 rounded-lg border text-xs transition ${
-                saved
-                  ? 'bg-blue-50 text-blue-600 border-blue-200'
-                  : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
-              }`}
-              title={saved ? 'Remove from saved watchlist' : 'Save to private research watchlist'}
-            >
-              <Bookmark className={`w-3.5 h-3.5 ${saved ? 'fill-blue-600' : ''}`} />
-            </button>
-          </div>
-        </div>
+          {/* Company Title & Location */}
+          <Link href={`/opportunity/${opportunity.id}`} className="block mb-2">
+            <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition flex items-center gap-1.5">
+              {opportunity.companyName}
+            </h3>
+            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+              {opportunity.city}, {opportunity.country} • {opportunity.businessStage} • {opportunity.yearsOperating} yrs operating
+            </p>
+          </Link>
 
-        {/* Company Title & Location */}
-        <Link href={`/opportunity/${opportunity.id}`} className="group block mb-2">
-          <h3 className="text-lg font-bold text-slate-900 group-hover:text-blue-600 transition flex items-center gap-1.5">
-            {opportunity.companyName}
-          </h3>
-          <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
-            <MapPin className="w-3.5 h-3.5 text-slate-400" />
-            {opportunity.city}, {opportunity.country} • {opportunity.yearsOperating} yrs operating
+          {/* Short Description */}
+          <p className="text-xs text-slate-600 line-clamp-2 mb-3.5 leading-relaxed">
+            {opportunity.businessDescription}
           </p>
-        </Link>
 
-        {/* Short Description */}
-        <p className="text-xs text-slate-600 line-clamp-2 mb-4 leading-relaxed">
-          {opportunity.businessDescription}
-        </p>
+          {/* Key Investment Metrics Grid - Tailored by Model */}
+          <div className="grid grid-cols-2 gap-2.5 py-3 border-y border-slate-100 text-xs mb-3.5 bg-slate-50/50 rounded-xl p-3">
+            <div>
+              <span className="block text-[10px] uppercase font-bold text-slate-400">Total Requirement</span>
+              <span className="text-sm font-bold text-slate-900">
+                {formatINR(opportunity.fundingRequirement)}
+              </span>
+            </div>
 
-        {/* Key Metrics Grid */}
-        <div className="grid grid-cols-2 gap-2.5 py-3 border-y border-slate-100 text-xs mb-4">
-          <div className="bg-slate-50/70 p-2.5 rounded-xl border border-slate-100">
-            <span className="block text-[11px] text-slate-400 font-medium">Funding Sought</span>
-            <span className="text-sm font-bold text-slate-900">
-              ₹{opportunity.fundingRequirement.toLocaleString('en-IN')}
-            </span>
+            <div>
+              <span className="block text-[10px] uppercase font-bold text-slate-400">Min Check Ticket</span>
+              <span className="text-sm font-bold text-blue-700">
+                {formatINR(opportunity.minimumInvestment || 200000)}
+              </span>
+            </div>
+
+            {isFixedReturn ? (
+              <>
+                <div className="pt-2 border-t border-slate-200/60">
+                  <span className="block text-[10px] uppercase font-bold text-slate-400">Tenure / Repayment</span>
+                  <span className="text-xs font-semibold text-emerald-800">
+                    {opportunity.investmentTenureMonths || 24} Mo ({opportunity.repaymentFrequency || 'MONTHLY'})
+                  </span>
+                </div>
+                <div className="pt-2 border-t border-slate-200/60">
+                  <span className="block text-[10px] uppercase font-bold text-slate-400">Security / Collateral</span>
+                  <span className="text-xs font-semibold text-slate-800 truncate block" title={opportunity.collateralDetails || 'Asset charge'}>
+                    {opportunity.collateralDetails ? 'Secured Facility' : 'Corporate Guarantee'}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="pt-2 border-t border-slate-200/60">
+                  <span className="block text-[10px] uppercase font-bold text-slate-400">Pre-Money Valuation</span>
+                  <span className="text-xs font-semibold text-slate-900">
+                    {formatINR(opportunity.valuation || opportunity.preMoneyValuation || 100000000)}
+                  </span>
+                </div>
+                <div className="pt-2 border-t border-slate-200/60">
+                  <span className="block text-[10px] uppercase font-bold text-slate-400">Growth / Posture</span>
+                  <span className="text-xs font-semibold text-indigo-700 truncate block">
+                    {opportunity.growthMetrics || opportunity.revenueStatus}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
-          <div className="bg-slate-50/70 p-2.5 rounded-xl border border-slate-100">
-            <span className="block text-[11px] text-slate-400 font-medium">Revenue Posture</span>
-            <span className="text-xs font-semibold text-slate-800 truncate block">
-              {opportunity.revenueStatus}
-            </span>
-          </div>
-        </div>
 
-        {/* Source-Verified Revenue Detail Note */}
-        {opportunity.revenueDetails && (
-          <div className="text-[11px] text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 mb-3 flex items-start gap-1.5">
-            <FileCheck className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-            <span className="line-clamp-1 italic">{opportunity.revenueDetails}</span>
-          </div>
-        )}
+          {/* Revenue Note */}
+          {opportunity.revenueDetails && (
+            <div className="text-[11px] text-slate-600 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100 mb-3 flex items-start gap-1.5">
+              <FileCheck className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+              <span className="line-clamp-1 italic">{opportunity.revenueDetails}</span>
+            </div>
+          )}
 
-        {/* Verification Status Badge */}
-        <div className="flex items-center justify-between text-xs mb-3">
-          <span className="text-[11px] text-slate-400 font-medium">Verification Status:</span>
-          {isVerified ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-              <ShieldCheck className="w-3 h-3" /> Information Verified
-            </span>
-          ) : isUnderReview ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-              <Clock className="w-3 h-3" /> Pending Review
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full">
-              Self-Reported
-            </span>
+          {/* Verification Status Badge */}
+          <div className="flex items-center justify-between text-xs mb-3">
+            <span className="text-[11px] text-slate-400 font-medium">Verification Status:</span>
+            {isVerified ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> MCA & ROC Verified
+              </span>
+            ) : isUnderReview ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                <Clock className="w-3.5 h-3.5 text-amber-600" /> Diligence In Progress
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                Self-Reported
+              </span>
+            )}
+          </div>
+
+          {/* Risk Indicators Tag if present */}
+          {opportunity.riskFlags && opportunity.riskFlags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3.5">
+              {opportunity.riskFlags.slice(0, 1).map((flag, i) => (
+                <span
+                  key={i}
+                  className="text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/70 px-2 py-0.5 rounded-md flex items-center gap-1 line-clamp-1"
+                  title={flag.description}
+                >
+                  <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
+                  {flag.category}: {flag.description}
+                </span>
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Risk Indicators Tag if present */}
-        {opportunity.riskFlags && opportunity.riskFlags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {opportunity.riskFlags.slice(0, 1).map((flag, i) => (
-              <span
-                key={i}
-                className="text-[11px] text-amber-800 bg-amber-50/80 border border-amber-200/70 px-2 py-0.5 rounded-md flex items-center gap-1 line-clamp-1"
-                title={flag.description}
-              >
-                <AlertCircle className="w-3 h-3 text-amber-600 shrink-0" />
-                {flag.category}: {flag.description}
-              </span>
-            ))}
+        {/* Bottom Footer: Match Score, Express Interest, and View Diligence */}
+        <div className="pt-3 border-t border-slate-100 space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <MatchScoreBadge
+              score={opportunity.matchScore ?? 75}
+              breakdown={opportunity.matchBreakdown}
+              summaryExplanation={opportunity.matchSummary}
+              size="sm"
+            />
+
+            <Link
+              href={`/opportunity/${opportunity.id}`}
+              className="inline-flex items-center gap-1 text-xs font-semibold text-slate-700 hover:text-blue-600 transition"
+            >
+              Full Diligence <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
-        )}
+
+          <button
+            onClick={() => setShowInterestModal(true)}
+            className="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-blue-600 text-white text-xs font-semibold transition flex items-center justify-center gap-1.5 shadow-sm"
+          >
+            <Send className="w-3 h-3 text-blue-300" />
+            Express Indicative Interest
+          </button>
+        </div>
       </div>
 
-      {/* Bottom Footer: Match Score Badge & Research CTA */}
-      <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-        <MatchScoreBadge
-          score={opportunity.matchScore ?? 65}
-          breakdown={opportunity.matchBreakdown}
-          summaryExplanation={opportunity.matchSummary}
-          size="sm"
-        />
-
-        <Link
-          href={`/opportunity/${opportunity.id}`}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
-        >
-          Research <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
-      </div>
-    </div>
+      {/* Express Interest Modal */}
+      <ExpressInterestModal
+        isOpen={showInterestModal}
+        onClose={() => setShowInterestModal(false)}
+        opportunity={opportunity}
+      />
+    </>
   );
 }

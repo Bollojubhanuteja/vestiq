@@ -5,17 +5,17 @@ import { calculatePreferenceMatch, MatchingWeights, DEFAULT_WEIGHTS } from '@/li
 
 export const dynamic = 'force-dynamic';
 
-
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const q = searchParams.get('q') || '';
+    const model = searchParams.get('model'); // "ALL", "FIXED_RETURN", "EQUITY"
     const industry = searchParams.get('industry');
     const stage = searchParams.get('stage');
     const location = searchParams.get('location');
-    const revenueStatus = searchParams.get('revenueStatus');
-    const profitabilityStatus = searchParams.get('profitabilityStatus');
-    const verificationStatus = searchParams.get('verificationStatus');
+    const riskLevel = searchParams.get('riskLevel');
+    const minAmount = searchParams.get('minAmount') ? Number(searchParams.get('minAmount')) : null;
+    const maxAmount = searchParams.get('maxAmount') ? Number(searchParams.get('maxAmount')) : null;
     const sortBy = searchParams.get('sortBy') || 'match';
 
     // Current session
@@ -84,6 +84,10 @@ export async function GET(req: NextRequest) {
       ];
     }
 
+    if (model && model !== 'ALL' && model !== 'All') {
+      whereClause.investmentModel = model;
+    }
+
     if (industry && industry !== 'All') {
       whereClause.industry = industry;
     }
@@ -93,19 +97,23 @@ export async function GET(req: NextRequest) {
     }
 
     if (location && location !== 'All') {
-      whereClause.country = { contains: location };
+      whereClause.OR = [
+        ...(whereClause.OR || []),
+        { city: { contains: location } },
+        { country: { contains: location } },
+      ];
     }
 
-    if (revenueStatus && revenueStatus !== 'All') {
-      whereClause.revenueStatus = revenueStatus;
+    if (riskLevel && riskLevel !== 'All') {
+      whereClause.riskLevel = riskLevel;
     }
 
-    if (profitabilityStatus && profitabilityStatus !== 'All') {
-      whereClause.profitabilityStatus = profitabilityStatus;
+    if (minAmount !== null) {
+      whereClause.fundingRequirement = { ...whereClause.fundingRequirement, gte: minAmount };
     }
 
-    if (verificationStatus && verificationStatus !== 'All') {
-      whereClause.verificationStatus = verificationStatus;
+    if (maxAmount !== null) {
+      whereClause.fundingRequirement = { ...whereClause.fundingRequirement, lte: maxAmount };
     }
 
     const opportunities = await db.businessProfile.findMany({
@@ -119,23 +127,49 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Compute preference match score for each opportunity
+    // Compute preference match score and enrich each opportunity
     const computed = opportunities.map(opp => {
       const match = calculatePreferenceMatch(investorPrefs, opp, weights);
       return {
         id: opp.id,
         companyName: opp.companyName,
+        founderName: opp.founderName,
         industry: opp.industry,
         city: opp.city,
         country: opp.country,
         businessStage: opp.businessStage,
         fundingRequirement: opp.fundingRequirement,
+        investmentModel: opp.investmentModel,
+        minimumInvestment: opp.minimumInvestment,
+
+        // Fixed Return Model Fields
+        proposedReturnRate: opp.proposedReturnRate,
+        investmentTenureMonths: opp.investmentTenureMonths,
+        expectedRepaymentAmount: opp.expectedRepaymentAmount,
+        repaymentFrequency: opp.repaymentFrequency,
+        collateralDetails: opp.collateralDetails,
+
+        // Equity Model Fields
+        valuation: opp.valuation,
+        equityOffered: opp.equityOffered,
+        preMoneyValuation: opp.preMoneyValuation,
+        postMoneyValuation: opp.postMoneyValuation,
+        investorOwnershipPercentage: opp.investorOwnershipPercentage,
+        investorRights: opp.investorRights,
+
+        // Operational & Risk Metrics
         revenueStatus: opp.revenueStatus,
         revenueDetails: opp.revenueDetails,
         profitabilityStatus: opp.profitabilityStatus,
         yearsOperating: opp.yearsOperating,
         teamSize: opp.teamSize,
         businessDescription: opp.businessDescription,
+        growthMetrics: opp.growthMetrics,
+        riskLevel: opp.riskLevel,
+        fundingStatus: opp.fundingStatus,
+        amountCommitted: opp.amountCommitted,
+        investorCount: opp.investorCount,
+        agreementStatus: opp.agreementStatus,
         verificationStatus: opp.verificationStatus,
         verificationNotes: opp.verificationNotes,
         createdAt: opp.createdAt,
@@ -157,10 +191,12 @@ export async function GET(req: NextRequest) {
       computed.sort((a, b) => a.fundingRequirement - b.fundingRequirement);
     } else if (sortBy === 'fundingDesc') {
       computed.sort((a, b) => b.fundingRequirement - a.fundingRequirement);
+    } else if (sortBy === 'returnDesc') {
+      computed.sort((a, b) => (b.proposedReturnRate ?? 0) - (a.proposedReturnRate ?? 0));
+    } else if (sortBy === 'equityDesc') {
+      computed.sort((a, b) => (b.equityOffered ?? 0) - (a.equityOffered ?? 0));
     } else if (sortBy === 'industry') {
       computed.sort((a, b) => a.industry.localeCompare(b.industry));
-    } else if (sortBy === 'updated') {
-      computed.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
     }
 
     return NextResponse.json({

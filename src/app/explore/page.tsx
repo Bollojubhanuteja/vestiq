@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { OpportunityCard, OpportunityCardData } from '@/components/OpportunityCard';
 import {
   Search,
@@ -12,25 +13,29 @@ import {
   ArrowRight,
   ShieldCheck,
   RefreshCw,
-  Info
+  Info,
+  Percent,
+  TrendingUp,
+  Building2,
+  Sparkles
 } from 'lucide-react';
 
 const INDUSTRIES = [
   'All',
   'Technology',
   'AI',
-  'Agriculture',
-  'Healthcare',
-  'FinTech',
+  'CleanTech',
+  'HealthTech',
+  'AgriTech',
   'Logistics',
-  'Energy',
-  'E-commerce',
-  'SaaS',
   'Manufacturing',
+  'FinTech',
+  'Robotics',
+  'DevSecOps',
   'Other',
 ];
 
-const STAGES = ['All', 'Pre-seed', 'Seed', 'Early Stage', 'Growth', 'Expansion', 'Mature'];
+const STAGES = ['All', 'Seed', 'Early Stage', 'Growth', 'Expansion', 'Mature'];
 
 const REVENUE_OPTIONS = [
   'All',
@@ -50,17 +55,22 @@ const PROFITABILITY_OPTIONS = [
 
 const SORT_OPTIONS = [
   { value: 'match', label: 'Best Preference Match' },
+  { value: 'returnDesc', label: 'Fixed Return: High to Low (% p.a.)' },
+  { value: 'equityDesc', label: 'Equity Pool: High to Low (%)' },
   { value: 'newest', label: 'Newest Submissions' },
   { value: 'fundingAsc', label: 'Funding Requirement: Low to High' },
   { value: 'fundingDesc', label: 'Funding Requirement: High to Low' },
   { value: 'industry', label: 'Industry Name' },
-  { value: 'updated', label: 'Recently Updated' },
 ];
 
-export default function ExplorePage() {
+function ExploreContent() {
+  const searchParams = useSearchParams();
+  const initialModel = searchParams.get('model') || 'ALL';
+
   const [opportunities, setOpportunities] = useState<OpportunityCardData[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
+  const [selectedModel, setSelectedModel] = useState<string>(initialModel);
   const [selectedIndustry, setSelectedIndustry] = useState('All');
   const [selectedStage, setSelectedStage] = useState('All');
   const [selectedRevenue, setSelectedRevenue] = useState('All');
@@ -70,11 +80,19 @@ export default function ExplorePage() {
   const [comparedIds, setComparedIds] = useState<string[]>([]);
   const [hasPersonalizedMatches, setHasPersonalizedMatches] = useState(false);
 
+  useEffect(() => {
+    const urlModel = searchParams.get('model');
+    if (urlModel) {
+      setSelectedModel(urlModel);
+    }
+  }, [searchParams]);
+
   const fetchOpportunities = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
       if (query) params.set('q', query);
+      if (selectedModel && selectedModel !== 'ALL') params.set('model', selectedModel);
       if (selectedIndustry !== 'All') params.set('industry', selectedIndustry);
       if (selectedStage !== 'All') params.set('stage', selectedStage);
       if (selectedRevenue !== 'All') params.set('revenueStatus', selectedRevenue);
@@ -98,6 +116,7 @@ export default function ExplorePage() {
   useEffect(() => {
     fetchOpportunities();
   }, [
+    selectedModel,
     selectedIndustry,
     selectedStage,
     selectedRevenue,
@@ -127,6 +146,7 @@ export default function ExplorePage() {
 
   const handleResetFilters = () => {
     setQuery('');
+    setSelectedModel('ALL');
     setSelectedIndustry('All');
     setSelectedStage('All');
     setSelectedRevenue('All');
@@ -135,6 +155,10 @@ export default function ExplorePage() {
     setSortBy('match');
   };
 
+  // Counts for tabs
+  const fixedCount = opportunities.filter((o) => o.investmentModel === 'FIXED_RETURN').length;
+  const equityCount = opportunities.filter((o) => o.investmentModel === 'EQUITY').length;
+
   return (
     <div className="py-10 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -142,16 +166,19 @@ export default function ExplorePage() {
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
+              <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100 mb-2">
+                <Sparkles className="w-3.5 h-3.5" /> Institutional Diligence Discovery
+              </div>
               <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-                Explore Opportunities
+                Explore Business Opportunities
               </h1>
               <p className="mt-1 text-sm text-slate-600">
-                Discover emerging businesses, review source-verified metrics, and evaluate preference compatibility.
+                Filter verified businesses in India across Fixed Return funding (14%–18% p.a.) and Direct Equity partnerships.
               </p>
             </div>
 
             {/* Legal match notice */}
-            <div className="text-xs text-slate-500 bg-white border border-slate-200 p-2.5 rounded-xl flex items-center gap-2">
+            <div className="text-xs text-slate-500 bg-white border border-slate-200 p-2.5 rounded-xl flex items-center gap-2 shadow-sm">
               <Info className="w-4 h-4 text-blue-500 shrink-0" />
               <span>
                 {hasPersonalizedMatches
@@ -160,6 +187,44 @@ export default function ExplorePage() {
               </span>
             </div>
           </div>
+        </div>
+
+        {/* Investment Model Tabs */}
+        <div className="flex items-center gap-2 mb-6 border-b border-slate-200 pb-3">
+          <button
+            onClick={() => setSelectedModel('ALL')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+              selectedModel === 'ALL'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            All Models
+          </button>
+
+          <button
+            onClick={() => setSelectedModel('FIXED_RETURN')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+              selectedModel === 'FIXED_RETURN'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <Percent className="w-3.5 h-3.5" />
+            Fixed Return Funding (14%–18% p.a.)
+          </button>
+
+          <button
+            onClick={() => setSelectedModel('EQUITY')}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 ${
+              selectedModel === 'EQUITY'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+            }`}
+          >
+            <TrendingUp className="w-3.5 h-3.5" />
+            Equity &amp; Direct Partnership
+          </button>
         </div>
 
         {/* Search & Main Filter Controls */}
@@ -171,7 +236,7 @@ export default function ExplorePage() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by company name, keywords, problem, or technology..."
+                placeholder="Search by company name, keywords, problem, tech stack, or city..."
                 className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -266,7 +331,7 @@ export default function ExplorePage() {
                 className="w-full p-2 rounded-lg border border-slate-200 bg-slate-50 text-slate-800 text-xs focus:ring-1 focus:ring-blue-500"
               >
                 <option value="All">All Statuses</option>
-                <option value="VERIFIED">Information Verified</option>
+                <option value="VERIFIED">ROC &amp; MCA Verified</option>
                 <option value="UNDER_REVIEW">Pending Review</option>
               </select>
             </div>
@@ -296,11 +361,11 @@ export default function ExplorePage() {
             <p className="text-sm text-slate-500">Loading opportunities...</p>
           </div>
         ) : opportunities.length === 0 ? (
-          <div className="py-20 text-center bg-white rounded-2xl border border-slate-200 p-8">
+          <div className="py-20 text-center bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
             <Filter className="w-10 h-10 text-slate-300 mx-auto mb-3" />
             <h3 className="text-base font-bold text-slate-800 mb-1">No matching opportunities found</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
-              Try broadening your filter criteria or clearing your search term to see more verified businesses.
+              Try switching your investment model filter or clearing keyword search to see more verified businesses.
             </p>
             <button
               onClick={handleResetFilters}
@@ -358,5 +423,18 @@ export default function ExplorePage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense fallback={
+      <div className="py-20 text-center">
+        <RefreshCw className="w-8 h-8 text-blue-600 animate-spin mx-auto mb-3" />
+        <p className="text-sm text-slate-500">Loading discovery engine...</p>
+      </div>
+    }>
+      <ExploreContent />
+    </Suspense>
   );
 }

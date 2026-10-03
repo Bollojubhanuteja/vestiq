@@ -20,15 +20,17 @@ export default function BusinessDashboardPage() {
   const router = useRouter();
   const [business, setBusiness] = useState<any>(null);
   const [inquiries, setInquiries] = useState<any[]>([]);
+  const [interests, setInterests] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [meRes, bizRes, inqRes] = await Promise.all([
+        const [meRes, bizRes, inqRes, intRes] = await Promise.all([
           fetch('/api/auth/me'),
           fetch('/api/business/profile'),
           fetch('/api/business/requests'),
+          fetch('/api/business/interests'),
         ]);
 
         if (!meRes.ok) {
@@ -50,6 +52,11 @@ export default function BusinessDashboardPage() {
         if (inqRes.ok) {
           const inqData = await inqRes.json();
           setInquiries(inqData.requests || []);
+        }
+
+        if (intRes.ok) {
+          const intData = await intRes.json();
+          setInterests(intData.interests || []);
         }
       } catch (e) {
         console.error(e);
@@ -143,24 +150,38 @@ export default function BusinessDashboardPage() {
         )}
 
         {/* Real Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Link
+            href="/dashboard/business/requests"
+            className="p-6 bg-emerald-50/70 rounded-2xl border border-emerald-200 shadow-sm hover:border-emerald-400 transition block"
+          >
+            <span className="text-xs text-emerald-800 font-bold block mb-1">Incoming Investor Interests</span>
+            <div className="text-2xl font-extrabold text-emerald-950">{interests.length}</div>
+            <p className="text-[11px] text-emerald-700 font-semibold mt-2">
+              Review checks &amp; draft term sheets &rarr;
+            </p>
+          </Link>
+
           <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <span className="text-xs text-slate-500 font-medium block mb-1">Inbound Investor Inquiries</span>
-            <div className="text-2xl font-extrabold text-slate-900">{inquiries.length}</div>
-            <Link
-              href="/dashboard/business/requests"
-              className="text-[11px] text-blue-600 font-semibold hover:underline mt-2 inline-block"
-            >
-              Open inquiries inbox &rarr;
-            </Link>
+            <span className="text-xs text-slate-500 font-medium block mb-1">Model &amp; Structure</span>
+            <div className="text-sm font-bold text-slate-900 mt-1">
+              {business?.investmentModel === 'FIXED_RETURN' ? (
+                <span className="text-emerald-700 font-bold">Fixed Return ({business?.proposedReturnRate || 16}% p.a.)</span>
+              ) : (
+                <span className="text-indigo-700 font-bold">Equity ({business?.equityOffered || 12}% Pool)</span>
+              )}
+            </div>
+            <span className="text-[11px] text-slate-400 mt-1 block">
+              Min Check: ₹{business?.minimumInvestment ? (business.minimumInvestment / 100000).toFixed(0) : '2'} Lakhs
+            </span>
           </div>
 
           <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
-            <span className="text-xs text-slate-500 font-medium block mb-1">Capital Requirement</span>
+            <span className="text-xs text-slate-500 font-medium block mb-1">Total Capital Requirement</span>
             <div className="text-2xl font-extrabold text-slate-900">
-              ₹{business?.fundingRequirement ? business.fundingRequirement.toLocaleString('en-IN') : '0'}
+              ₹{business?.fundingRequirement ? (business.fundingRequirement / 100000).toFixed(0) : '0'} Lakhs
             </div>
-            <span className="text-[11px] text-slate-400 mt-1 block">Stage: {business?.businessStage || 'Unset'}</span>
+            <span className="text-[11px] text-slate-400 mt-1 block">Committed: ₹{business?.amountCommitted ? (business.amountCommitted / 100000).toFixed(0) : '0'} Lakhs</span>
           </div>
 
           <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-sm">
@@ -168,16 +189,16 @@ export default function BusinessDashboardPage() {
             <div className="text-sm font-bold text-slate-800 mt-1">
               {business?.verificationStatus === 'VERIFIED' ? (
                 <span className="text-emerald-700 flex items-center gap-1">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" /> Platform Verified
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" /> MCA &amp; ROC Verified
                 </span>
               ) : (
                 <span className="text-amber-700 flex items-center gap-1">
-                  <Clock className="w-4 h-4 text-amber-600" /> Pending Admin Audit
+                  <Clock className="w-4 h-4 text-amber-600" /> Under Review
                 </span>
               )}
             </div>
             <p className="text-[11px] text-slate-400 mt-1">
-              {business?.verificationNotes || 'Admin notes logged here.'}
+              {business?.verificationNotes || 'Diligence notes logged here.'}
             </p>
           </div>
         </div>

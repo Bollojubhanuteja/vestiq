@@ -329,6 +329,97 @@ async function runTests() {
     assert(testReq.status === 'PENDING', 'Information request created with PENDING status');
     await db.informationRequest.delete({ where: { id: testReq.id } });
 
+    // ----------------------------------------------------
+    // TEST 7: Two B2B Investment Models Verification
+    // ----------------------------------------------------
+    console.log('\nTEST SUITE 7: Two Structured Investment Models (Fixed Return vs Equity)');
+    const fixedReturnDeal = await db.businessProfile.findFirst({
+      where: { investmentModel: 'FIXED_RETURN', status: 'APPROVED' },
+    });
+    assert(!!fixedReturnDeal, 'Option 1: Fixed return business deal exists in live database');
+    assert(
+      typeof fixedReturnDeal?.proposedReturnRate === 'number' && fixedReturnDeal.proposedReturnRate > 0,
+      `Option 1 has explicit return rate (% p.a.): ${fixedReturnDeal?.proposedReturnRate}%`
+    );
+    assert(
+      typeof fixedReturnDeal?.investmentTenureMonths === 'number' && fixedReturnDeal.investmentTenureMonths > 0,
+      `Option 1 has explicit tenure duration: ${fixedReturnDeal?.investmentTenureMonths} months`
+    );
+    assert(
+      !!fixedReturnDeal?.collateralDetails,
+      `Option 1 specifies collateral / security details: "${fixedReturnDeal?.collateralDetails?.slice(0, 45)}..."`
+    );
+
+    const equityDeal = await db.businessProfile.findFirst({
+      where: { investmentModel: 'EQUITY', status: 'APPROVED' },
+    });
+    assert(!!equityDeal, 'Option 2: Equity & partnership deal exists in live database');
+    assert(
+      typeof equityDeal?.valuation === 'number' && equityDeal.valuation > 0,
+      `Option 2 has explicit pre-money valuation: ₹${(equityDeal?.valuation / 10000000).toFixed(2)} Cr`
+    );
+    assert(
+      typeof equityDeal?.equityOffered === 'number' && equityDeal.equityOffered > 0,
+      `Option 2 has explicit equity pool percentage: ${equityDeal?.equityOffered}%`
+    );
+    assert(
+      !!equityDeal?.investorRights,
+      `Option 2 specifies governance / investor covenants: "${equityDeal?.investorRights?.slice(0, 45)}..."`
+    );
+
+    // ----------------------------------------------------
+    // TEST 8: Investment Interest & Indicative Agreement Pipeline
+    // ----------------------------------------------------
+    console.log('\nTEST SUITE 8: Investment Interest & Agreement Workflow');
+    const testInterest = await db.investmentInterest.create({
+      data: {
+        investorUserId: invUser1.id,
+        businessProfileId: fixedReturnDeal.id,
+        investmentModel: 'FIXED_RETURN',
+        intendedAmount: 500000,
+        ownershipOrReturnProposed: '16.0% Fixed IRR',
+        notes: 'Diligence note: Seeking 24-month senior secured facility.',
+        status: 'INTEREST_SUBMITTED',
+      },
+    });
+    assert(testInterest.status === 'INTEREST_SUBMITTED', 'Investor expression of interest submitted');
+
+    // Advance status to DISCUSSION and DUE_DILIGENCE
+    const updatedInterest = await db.investmentInterest.update({
+      where: { id: testInterest.id },
+      data: { status: 'DUE_DILIGENCE' },
+    });
+    assert(updatedInterest.status === 'DUE_DILIGENCE', 'Interest advanced to DUE_DILIGENCE stage');
+
+    // Create indicative agreement
+    const testAgreement = await db.investmentAgreement.create({
+      data: {
+        interestId: testInterest.id,
+        investorUserId: invUser1.id,
+        businessProfileId: fixedReturnDeal.id,
+        agreementType: 'FIXED_RETURN_DEBT',
+        principalOrAmount: 500000,
+        indicativeTerms: 'Indicative senior secured loan facility terms.',
+        status: 'DRAFT_INDICATIVE',
+      },
+    });
+    assert(testAgreement.status === 'DRAFT_INDICATIVE', 'Indicative term sheet agreement drafted');
+
+    // Both parties sign
+    const executedAgreement = await db.investmentAgreement.update({
+      where: { id: testAgreement.id },
+      data: {
+        investorSignedAt: new Date(),
+        businessSignedAt: new Date(),
+        status: 'EXECUTED',
+      },
+    });
+    assert(executedAgreement.status === 'EXECUTED', 'Both parties executed the indicative agreement');
+
+    // Cleanup test interest & agreement
+    await db.investmentAgreement.delete({ where: { id: testAgreement.id } });
+    await db.investmentInterest.delete({ where: { id: testInterest.id } });
+
   } catch (error) {
     console.error('Test execution error:', error);
     failed++;

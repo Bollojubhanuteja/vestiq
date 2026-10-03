@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { MatchScoreBadge } from '@/components/MatchScoreBadge';
+import { ExpressInterestModal } from '@/components/ExpressInterestModal';
 import {
   Building2,
   MapPin,
@@ -12,7 +13,6 @@ import {
   ShieldCheck,
   AlertTriangle,
   FileText,
-  IndianRupee,
   TrendingUp,
   Bookmark,
   Scale,
@@ -22,7 +22,12 @@ import {
   AlertCircle,
   HelpCircle,
   ChevronRight,
-  Info
+  Info,
+  Percent,
+  Coins,
+  Lock,
+  Calendar,
+  FileCheck
 } from 'lucide-react';
 
 export default function OpportunityDetailPage() {
@@ -37,6 +42,9 @@ export default function OpportunityDetailPage() {
   // Watchlist state
   const [isSaved, setIsSaved] = useState(false);
   const [savingWatchlist, setSavingWatchlist] = useState(false);
+
+  // Express Interest Modal
+  const [interestModalOpen, setInterestModalOpen] = useState(false);
 
   // Request info modal
   const [requestModalOpen, setRequestModalOpen] = useState(false);
@@ -153,11 +161,20 @@ export default function OpportunityDetailPage() {
   const diligenceQuestions = data.diligenceQuestions || [];
   const factualSummary = data.factualSummary || [];
 
+  const isFixedReturn = opp.investmentModel === 'FIXED_RETURN';
+
+  const formatINR = (val?: number | null) => {
+    if (!val) return '₹0';
+    if (val >= 10000000) return `₹${(val / 10000000).toFixed(val % 10000000 === 0 ? 0 : 2)} Cr`;
+    if (val >= 100000) return `₹${(val / 100000).toFixed(val % 100000 === 0 ? 0 : 1)} Lakhs`;
+    return `₹${val.toLocaleString('en-IN')}`;
+  };
+
   return (
     <div className="py-10 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Navigation Breadcrumb */}
-        <div className="mb-6 flex items-center justify-between">
+        {/* Navigation Breadcrumb & Top Bar */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <Link
             href="/explore"
             className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition"
@@ -185,10 +202,10 @@ export default function OpportunityDetailPage() {
               {isSaved ? 'Saved in Watchlist' : 'Save to Watchlist'}
             </button>
             <button
-              onClick={() => setRequestModalOpen(true)}
-              className="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5"
+              onClick={() => setInterestModalOpen(true)}
+              className="px-4 py-1.5 rounded-lg bg-slate-900 hover:bg-blue-600 text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5"
             >
-              <Send className="w-3.5 h-3.5" /> Request Information
+              <Send className="w-3.5 h-3.5 text-blue-300" /> Express Indicative Interest
             </button>
           </div>
         </div>
@@ -198,19 +215,33 @@ export default function OpportunityDetailPage() {
           <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6 pb-6 border-b border-slate-100">
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-xs font-bold px-3 py-1 rounded-md bg-slate-100 text-slate-800">
+                {isFixedReturn ? (
+                  <span className="text-xs font-bold px-3 py-1 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                    <Percent className="w-3.5 h-3.5 text-emerald-600" />
+                    Option 1: Fixed Return ({opp.proposedReturnRate || 16}% p.a.)
+                  </span>
+                ) : (
+                  <span className="text-xs font-bold px-3 py-1 rounded-md bg-indigo-50 text-indigo-800 border border-indigo-200 flex items-center gap-1">
+                    <TrendingUp className="w-3.5 h-3.5 text-indigo-600" />
+                    Option 2: Equity &amp; Partnership ({opp.equityOffered || 12}% Pool)
+                  </span>
+                )}
+
+                <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-800">
                   {opp.industry}
                 </span>
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+
+                <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
                   {opp.businessStage} Stage
                 </span>
+
                 {opp.verificationStatus === 'VERIFIED' ? (
                   <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3 text-emerald-600" /> Information Verified by Platform
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" /> ROC &amp; MCA Verified
                   </span>
                 ) : (
                   <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-amber-600" /> Pending Admin Review
+                    <Clock className="w-3.5 h-3.5 text-amber-600" /> Pending Admin Review
                   </span>
                 )}
               </div>
@@ -231,41 +262,44 @@ export default function OpportunityDetailPage() {
                 Preference Compatibility:
               </div>
               <MatchScoreBadge
-                score={matchResult ? matchResult.score : 70}
+                score={matchResult ? matchResult.score : 85}
                 breakdown={matchResult ? matchResult.breakdown : []}
-                summaryExplanation={matchResult ? matchResult.summaryExplanation : 'Standard preview score.'}
+                summaryExplanation={matchResult ? matchResult.summaryExplanation : 'Institutional compatibility score.'}
                 size="lg"
               />
               <p className="text-[11px] text-slate-500 mt-2 leading-tight">
-                Calculated purely from your saved investor preferences. Not an investment recommendation.
+                Calculated from your saved investor preferences. Non-advisory discovery aid.
               </p>
             </div>
           </div>
 
           {/* Core Metrics Ribbon */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 text-sm">
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span className="block text-xs text-slate-400 font-medium">Funding Requirement</span>
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="block text-xs text-slate-400 font-medium">Total Capital Sought</span>
               <span className="text-lg font-bold text-slate-900">
-                ₹{opp.fundingRequirement.toLocaleString('en-IN')}
+                {formatINR(opp.fundingRequirement)}
               </span>
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span className="block text-xs text-slate-400 font-medium">Reported Revenue Posture</span>
+
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="block text-xs text-slate-400 font-medium">Minimum Investment Check</span>
+              <span className="text-lg font-bold text-blue-700">
+                {formatINR(opp.minimumInvestment || 200000)}
+              </span>
+            </div>
+
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="block text-xs text-slate-400 font-medium">Reported Revenue</span>
               <span className="text-sm font-bold text-slate-800 truncate block">
                 {opp.revenueStatus}
               </span>
             </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span className="block text-xs text-slate-400 font-medium">Operating Profitability</span>
+
+            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+              <span className="block text-xs text-slate-400 font-medium">Operating Posture</span>
               <span className="text-sm font-bold text-slate-800 block">
                 {opp.profitabilityStatus}
-              </span>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span className="block text-xs text-slate-400 font-medium">Previous Capital</span>
-              <span className="text-sm font-semibold text-slate-800 truncate block">
-                {opp.previousFunding || 'Self-funded / Bootstrapped'}
               </span>
             </div>
           </div>
@@ -273,7 +307,7 @@ export default function OpportunityDetailPage() {
           {/* Revenue Source Verification Note */}
           {opp.revenueDetails && (
             <div className="mt-4 p-3 bg-blue-50/70 border border-blue-100 rounded-xl text-xs text-blue-900 flex items-start gap-2">
-              <FileText className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+              <FileCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
               <div>
                 <span className="font-semibold">Revenue Claim &amp; Documentation Note: </span>
                 <span>{opp.revenueDetails}</span>
@@ -282,7 +316,176 @@ export default function OpportunityDetailPage() {
           )}
         </div>
 
-        {/* Main Content Grid: 17 Sections Organized Cleanly */}
+        {/* SECTION 0: DEDICATED INVESTMENT MODEL & TERMS BOX */}
+        <div className="mb-8">
+          {isFixedReturn ? (
+            <div className="bg-emerald-50/60 border-2 border-emerald-500/40 rounded-3xl p-6 sm:p-8">
+              <div className="flex items-center justify-between pb-4 border-b border-emerald-200/80 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold">
+                    <Percent className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
+                      Option 1 Framework
+                    </span>
+                    <h2 className="text-2xl font-bold text-slate-900">
+                      Fixed Return / Debt Funding Facility
+                    </h2>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setInterestModalOpen(true)}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm transition"
+                >
+                  <Send className="w-3.5 h-3.5" /> Express Interest in this Yield
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs mb-6">
+                <div className="p-4 rounded-xl bg-white border border-emerald-200/70 shadow-2xs">
+                  <span className="text-slate-500 font-medium block">Proposed Annual Return</span>
+                  <span className="text-xl font-extrabold text-emerald-700 mt-1 block">
+                    {opp.proposedReturnRate || 16}% p.a.
+                  </span>
+                  <span className="text-[11px] text-slate-500">Contractual coupon rate</span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white border border-emerald-200/70 shadow-2xs">
+                  <span className="text-slate-500 font-medium block">Tenure Duration</span>
+                  <span className="text-xl font-extrabold text-slate-900 mt-1 block">
+                    {opp.investmentTenureMonths || 24} Months
+                  </span>
+                  <span className="text-[11px] text-slate-500">Fixed maturity horizon</span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white border border-emerald-200/70 shadow-2xs">
+                  <span className="text-slate-500 font-medium block">Repayment Frequency</span>
+                  <span className="text-xl font-extrabold text-slate-900 mt-1 block">
+                    {opp.repaymentFrequency || 'MONTHLY'}
+                  </span>
+                  <span className="text-[11px] text-slate-500">Principal + interest amortized</span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white border border-emerald-200/70 shadow-2xs">
+                  <span className="text-slate-500 font-medium block">Expected Repayment Pool</span>
+                  <span className="text-xl font-extrabold text-slate-900 mt-1 block">
+                    {opp.expectedRepaymentAmount ? formatINR(opp.expectedRepaymentAmount) : 'Formulaic (P + I)'}
+                  </span>
+                  <span className="text-[11px] text-slate-500">Total gross facility return</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white border border-emerald-200/70 text-xs text-slate-700 space-y-2 mb-4">
+                <div className="flex items-center gap-2 font-bold text-slate-900">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  Collateral &amp; Security Structure:
+                </div>
+                <p className="leading-relaxed">
+                  {opp.collateralDetails || 'Charge on company commercial receivables and primary capital assets registered under MCA Form CHG-1.'}
+                </p>
+              </div>
+
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Risk Disclosure:</strong> Proposed returns represent contractual obligations of the borrowing company. Returns are not guaranteed by Vestiq or insurance schemes and depend strictly on the company’s operating solvency.
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-indigo-50/60 border-2 border-indigo-500/40 rounded-3xl p-6 sm:p-8">
+              <div className="flex items-center justify-between pb-4 border-b border-indigo-200/80 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold">
+                    <TrendingUp className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-indigo-800">
+                      Option 2 Framework
+                    </span>
+                    <h2 className="text-2xl font-bold text-slate-900">
+                      Equity &amp; Direct Strategic Partnership
+                    </h2>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setInterestModalOpen(true)}
+                  className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition"
+                >
+                  <Send className="w-3.5 h-3.5" /> Express Interest in this Equity
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs mb-6">
+                <div className="p-4 rounded-xl bg-white border border-indigo-200/70 shadow-2xs">
+                  <span className="text-slate-500 font-medium block">Pre-Money Valuation</span>
+                  <span className="text-xl font-extrabold text-slate-900 mt-1 block">
+                    {formatINR(opp.valuation || opp.preMoneyValuation || 100000000)}
+                  </span>
+                  <span className="text-[11px] text-slate-500">Agreed baseline valuation</span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white border border-indigo-200/70 shadow-2xs">
+                  <span className="text-slate-500 font-medium block">Equity Pool Offered</span>
+                  <span className="text-xl font-extrabold text-indigo-700 mt-1 block">
+                    {opp.equityOffered || 12}%
+                  </span>
+                  <span className="text-[11px] text-slate-500">Aggregate share pool</span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white border border-indigo-200/70 shadow-2xs">
+                  <span className="text-slate-500 font-medium block">Minimum Check Size</span>
+                  <span className="text-xl font-extrabold text-blue-700 mt-1 block">
+                    {formatINR(opp.minimumInvestment || 500000)}
+                  </span>
+                  <span className="text-[11px] text-slate-500">Minimum ticket per investor</span>
+                </div>
+
+                <div className="p-4 rounded-xl bg-white border border-indigo-200/70 shadow-2xs">
+                  <span className="text-slate-500 font-medium block">Ownership per Min Check</span>
+                  <span className="text-xl font-extrabold text-indigo-700 mt-1 block">
+                    {opp.investorOwnershipPercentage
+                      ? `${opp.investorOwnershipPercentage}%`
+                      : `${(((opp.minimumInvestment || 500000) / (opp.valuation || 100000000)) * 100).toFixed(2)}%`}
+                  </span>
+                  <span className="text-[11px] text-slate-500">Pro-rata ownership</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div className="p-4 rounded-2xl bg-white border border-indigo-200/70 text-xs text-slate-700 space-y-1.5">
+                  <span className="font-bold text-slate-900 block flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-indigo-600" /> Investor Rights &amp; Covenants:
+                  </span>
+                  <p className="leading-relaxed">
+                    {opp.investorRights || 'Information rights, quarterly audited financial MIS, board observer seat, tag-along rights, and pro-rata subscription.'}
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white border border-indigo-200/70 text-xs text-slate-700 space-y-1.5">
+                  <span className="font-bold text-slate-900 block flex items-center gap-1.5">
+                    <TrendingUp className="w-4 h-4 text-indigo-600" /> Operational Growth Profile:
+                  </span>
+                  <p className="leading-relaxed">
+                    {opp.growthMetrics || 'Demonstrated YoY unit economic growth and path to commercial scale.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Risk Disclosure:</strong> Equity investments carry substantial venture risk, illiquidity, and potential for total loss of capital. Future liquidity depends on company growth, subsequent funding, and M&amp;A exits.
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left 2 Columns: Deep Diligence Dossier */}
           <div className="lg:col-span-2 space-y-8">
@@ -311,7 +514,7 @@ export default function OpportunityDetailPage() {
               </div>
             </div>
 
-            {/* 4 & 5 & 6. Product, Market & Business Model */}
+            {/* 4 & 5. Business Model & Traction */}
             <div className="bg-white p-7 rounded-3xl border border-slate-200 space-y-6">
               <div>
                 <h2 className="text-lg font-bold text-slate-900 mb-2">4. Business Model &amp; Monetization</h2>
@@ -321,14 +524,14 @@ export default function OpportunityDetailPage() {
               </div>
 
               <div>
-                <h2 className="text-lg font-bold text-slate-900 mb-2">5. Customer Traction &amp; Validation</h2>
+                <h2 className="text-lg font-bold text-slate-900 mb-2">5. Customer Traction &amp; Commercial Validation</h2>
                 <p className="text-sm text-slate-700 leading-relaxed">
                   {opp.customerTraction || 'Specific pilot contracts and retention cohorts available upon formal diligence inquiry.'}
                 </p>
               </div>
             </div>
 
-            {/* 7 & 8. Team & Operational Capability */}
+            {/* 6. Team & Organization */}
             <div className="bg-white p-7 rounded-3xl border border-slate-200">
               <h2 className="text-lg font-bold text-slate-900 mb-3">6. Team &amp; Organization</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
@@ -345,13 +548,13 @@ export default function OpportunityDetailPage() {
               </div>
             </div>
 
-            {/* 9 & 10. Funding Requirement & Intended Use of Funds */}
+            {/* 7. Capital Allocation & Intended Use of Funds */}
             <div className="bg-white p-7 rounded-3xl border border-slate-200">
               <h2 className="text-lg font-bold text-slate-900 mb-3">7. Capital Allocation &amp; Use of Funds</h2>
               <div className="mb-4">
                 <span className="text-xs text-slate-500">Total Capital Sought:</span>
                 <span className="text-xl font-extrabold text-blue-600 block mt-0.5">
-                  ₹{opp.fundingRequirement.toLocaleString('en-IN')}
+                  {formatINR(opp.fundingRequirement)}
                 </span>
               </div>
               <p className="text-sm text-slate-700 leading-relaxed bg-blue-50/50 p-4 rounded-xl border border-blue-100">
@@ -359,7 +562,7 @@ export default function OpportunityDetailPage() {
               </p>
             </div>
 
-            {/* 11. Known Risk Indicators */}
+            {/* 8. Known Risk Indicators */}
             <div className="bg-white p-7 rounded-3xl border border-slate-200">
               <div className="flex items-center gap-2 mb-3">
                 <AlertTriangle className="w-5 h-5 text-amber-500" />
@@ -393,7 +596,7 @@ export default function OpportunityDetailPage() {
               )}
             </div>
 
-            {/* 12. Supporting Documents */}
+            {/* 9. Supporting Documents */}
             <div className="bg-white p-7 rounded-3xl border border-slate-200">
               <h2 className="text-lg font-bold text-slate-900 mb-3">9. Verified Supporting Documents</h2>
               {opp.documents && opp.documents.length > 0 ? (
@@ -424,38 +627,58 @@ export default function OpportunityDetailPage() {
             </div>
           </div>
 
-          {/* Right Column: AI Diligence Aids & Request Info Card */}
+          {/* Right Column: Diligence Actions & AI Aids */}
           <div className="space-y-8">
-            {/* Request Information Action Card */}
-            <div className="bg-white p-6 rounded-3xl border border-blue-200 shadow-sm sticky top-24">
-              <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center mb-4">
-                <Send className="w-5 h-5" />
+            {/* Primary Action Card: Express Indicative Interest */}
+            <div className="bg-white p-6 rounded-3xl border-2 border-slate-900 shadow-sm sticky top-24 space-y-4">
+              <div className="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center">
+                <Send className="w-5 h-5 text-blue-400" />
               </div>
-              <h3 className="text-base font-bold text-slate-900 mb-1">
-                Conduct Private Diligence
-              </h3>
-              <p className="text-xs text-slate-600 mb-4 leading-relaxed">
-                Connect directly with founder {opp.founderName}. Request operational clarification, schedule a briefing, or ask specific commercial questions.
-              </p>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Express Indicative Interest
+                </h3>
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                  Register your interest with {opp.founderName} to receive confidential data room access and indicative agreement drafts.
+                </p>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                <div className="flex justify-between py-1">
+                  <span className="text-slate-500">Model:</span>
+                  <span className="font-bold text-slate-800">
+                    {isFixedReturn ? 'Fixed Return (Debt)' : 'Equity Partnership'}
+                  </span>
+                </div>
+                <div className="flex justify-between py-1">
+                  <span className="text-slate-500">Min Check:</span>
+                  <span className="font-bold text-blue-700">
+                    {formatINR(opp.minimumInvestment || 200000)}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setInterestModalOpen(true)}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-md transition flex items-center justify-center gap-2"
+              >
+                <Send className="w-4 h-4" /> Express Interest Now
+              </button>
 
               <button
                 onClick={() => setRequestModalOpen(true)}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm transition flex items-center justify-center gap-2 mb-3"
+                className="w-full py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-2"
               >
-                <Send className="w-4 h-4" /> Request Information
+                Request Custom Information
               </button>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-[11px] text-slate-500 leading-relaxed">
-                <strong>Privacy Note:</strong> Inquiries are transmitted securely. No financial commitments or binding agreements take place on Vestiq.
-              </div>
-
               {/* Factual Executive Summary Box */}
-              <div className="mt-6 pt-6 border-t border-slate-100">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 mb-3">
+              <div className="pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 mb-2">
                   <ShieldCheck className="w-4 h-4 text-blue-600" />
                   <span>Objective Profile Synthesis</span>
                 </div>
-                <ul className="space-y-2 text-xs text-slate-600 leading-snug">
+                <ul className="space-y-1.5 text-xs text-slate-600 leading-snug">
                   {factualSummary.map((item: string, idx: number) => (
                     <li key={idx} className="flex items-start gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0 mt-1.5" />
@@ -466,27 +689,24 @@ export default function OpportunityDetailPage() {
               </div>
 
               {/* Structured Investor Diligence Questions (AI Assistive Tool) */}
-              <div className="mt-6 pt-6 border-t border-slate-100">
+              <div className="pt-4 border-t border-slate-100">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
                     <HelpCircle className="w-4 h-4 text-emerald-600" />
-                    <span>Diligence Questions to Ask</span>
+                    <span>Key Diligence Questions</span>
                   </div>
                   <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
-                    AI Assist
+                    Assistive
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 mb-3">
-                  Key questions tailored to {opp.industry} ventures:
-                </p>
 
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {diligenceQuestions.slice(0, 3).map((q: any, i: number) => (
                     <div
                       key={i}
-                      className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs"
+                      className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-xs"
                     >
-                      <span className="font-semibold text-slate-800 block mb-1">
+                      <span className="font-semibold text-slate-800 block mb-0.5">
                         {q.question}
                       </span>
                       <span className="text-[10px] text-slate-500 block italic">
@@ -499,6 +719,13 @@ export default function OpportunityDetailPage() {
             </div>
           </div>
         </div>
+
+        {/* Modal: Express Interest */}
+        <ExpressInterestModal
+          isOpen={interestModalOpen}
+          onClose={() => setInterestModalOpen(false)}
+          opportunity={opp}
+        />
 
         {/* Modal: Request Information Form */}
         {requestModalOpen && (

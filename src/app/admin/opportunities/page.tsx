@@ -183,6 +183,15 @@ export default function AdminOpportunitiesPage() {
                         <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
                           {opp.businessStage}
                         </span>
+                        <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+                          opp.investmentModel === 'FIXED_RETURN'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                            : 'bg-indigo-50 text-indigo-800 border-indigo-200'
+                        }`}>
+                          {opp.investmentModel === 'FIXED_RETURN'
+                            ? `Fixed Return (${opp.proposedReturnRate || 16}% p.a.)`
+                            : `Equity (${opp.equityOffered || 10}% Pool)`}
+                        </span>
                         <span
                           className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
                             opp.status === 'APPROVED'

@@ -23,7 +23,12 @@ model User {
   businessProfile          BusinessProfile?
   watchlists               Watchlist[]
   comparisons              Comparison[]
-  sentInformationRequests  InformationRequest[] @relation("InvestorRequests")
+  sentInformationRequests  InformationRequest[]  @relation("InvestorRequests")
+  investmentInterests      InvestmentInterest[]  @relation("InvestorInterests")
+  investmentAgreements     InvestmentAgreement[] @relation("InvestorAgreements")
+  notifications            Notification[]
+  sentMessages             InvestmentMessage[]   @relation("SentMessages")
+  receivedMessages         InvestmentMessage[]   @relation("ReceivedMessages")
   auditLogs                AuditLog[]
   adminNotes               AdminNote[]
 }
@@ -47,7 +52,7 @@ model InvestorPreference {
   investorProfile         InvestorProfile @relation(fields: [investorProfileId], references: [id], onDelete: Cascade)
   minInvestment           Float           @default(100000)
   maxInvestment           Float           @default(5000000)
-  industries              String          @default("[]") // JSON string: ["Technology", "AI", "Healthcare", ...]
+  industries              String          @default("[]") // JSON string: ["Technology", "CleanTech", "Healthcare", ...]
   geographies             String          @default("[]") // JSON string: ["India", "Southeast Asia", ...]
   horizons                String          @default("[]") // JSON string: ["<1 year", "1–3 years", "3–5 years", "5+ years"]
   riskTolerance           String          @default("MODERATE") // "LOWER", "MODERATE", "HIGHER"
@@ -70,7 +75,7 @@ model BusinessProfile {
   country             String
   city                String
   industry            String
-  businessStage       String   // "Pre-seed", "Seed", "Early Stage", "Growth", "Expansion", "Mature"
+  businessStage       String   // "Seed", "Early Traction", "Growth", "Expansion", "Mature"
   yearsOperating      Float    @default(1)
   teamSize            Int      @default(1)
   businessDescription String
@@ -81,7 +86,37 @@ model BusinessProfile {
   revenueStatus       String   // "Pre-revenue", "₹1L - ₹10L/mo", "₹10L - ₹50L/mo", "₹50L+/mo", "Undisclosed"
   revenueDetails      String?  // Source-verified note e.g. "Self-reported: ₹32L FY25"
   profitabilityStatus String   // "Profitable", "Near Break-even", "Loss-making", "Early Stage"
-  fundingRequirement  Float    // In local currency units e.g. 2500000
+  fundingRequirement  Float    // In local INR e.g. 7500000
+
+  // ----------------------------------------------------
+  // TWO INVESTMENT MODELS: FIXED_RETURN or EQUITY
+  // ----------------------------------------------------
+  investmentModel     String   @default("EQUITY") // "FIXED_RETURN", "EQUITY", "HYBRID"
+  minimumInvestment   Float    @default(200000)   // Minimum ticket in INR
+
+  // Fixed Return Model Fields
+  proposedReturnRate      Float?   // e.g. 16.0 (% per annum)
+  investmentTenureMonths  Int?     // e.g. 24 (months)
+  expectedRepaymentAmount Float?   // e.g. 9900000 (total return)
+  repaymentFrequency      String?  // "MONTHLY", "QUARTERLY", "AT_MATURITY"
+  collateralDetails       String?  // e.g. "Charge on DC charging equipment + escrow PPA receivables"
+
+  // Equity / Partnership Model Fields
+  valuation                   Float?   // Business Valuation in INR e.g. 80000000 (₹8 Cr)
+  equityOffered               Float?   // Percentage e.g. 15.0 (%)
+  preMoneyValuation           Float?   // Pre-money INR
+  postMoneyValuation          Float?   // Post-money INR
+  investorOwnershipPercentage Float?   // Percentage per min ticket
+  investorRights              String?  // Information rights, board observer seat, pro-rata
+
+  // Additional Operational & Risk Transparency
+  growthMetrics       String?  // e.g. "42% YoY growth, 85% gross margins"
+  riskLevel           String   @default("MODERATE") // "LOW", "MODERATE", "HIGH"
+  fundingStatus       String   @default("LIVE") // "DRAFT", "SUBMITTED", "UNDER_REVIEW", "VERIFIED", "LIVE", "FUNDING_IN_PROGRESS", "FUNDED", "CLOSED"
+  amountCommitted     Float    @default(0)
+  investorCount       Int      @default(0)
+  agreementStatus     String   @default("INDICATIVE_TERMS") // Indicative until final legal execution
+
   intendedUseOfFunds  String
   previousFunding     String?  // "Bootstrapped", "Angel ₹10L", etc.
   status              String   @default("DRAFT") // "DRAFT", "SUBMITTED", "UNDER_REVIEW", "APPROVED", "REJECTED", "NEEDS_INFO"
@@ -95,6 +130,8 @@ model BusinessProfile {
   documents           OpportunityDocument[]
   watchlists          Watchlist[]
   informationRequests InformationRequest[]
+  investmentInterests InvestmentInterest[]
+  investmentAgreements InvestmentAgreement[]
   riskFlags           RiskFlag[]
   adminNotes          AdminNote[]
 }
@@ -108,7 +145,7 @@ model OpportunityDocument {
   fileUrl            String
   fileSize           String?
   verificationStatus String          @default("PENDING") // "PENDING", "VERIFIED", "REJECTED"
-  sourceClaim        String?         // E.g., "Founder uploaded certified document"
+  sourceClaim        String?         // E.g., "Audited by KPMG India / MCA ROC verified"
   createdAt          DateTime        @default(now())
 }
 
@@ -150,6 +187,74 @@ model InformationRequest {
   updatedAt         DateTime        @updatedAt
 }
 
+model InvestmentInterest {
+  id                          String          @id @default(cuid())
+  investorUserId              String
+  investorUser                User            @relation("InvestorInterests", fields: [investorUserId], references: [id], onDelete: Cascade)
+  businessProfileId           String
+  businessProfile             BusinessProfile @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+  investmentModel             String          // "FIXED_RETURN" or "EQUITY"
+  intendedAmount              Float           // In INR e.g. 500000
+  ownershipOrReturnProposed   String          // e.g. "16.0% Fixed IRR" or "5.0% Equity"
+  notes                       String?
+  status                      String          @default("INTEREST_SUBMITTED")
+  // Pipeline: "INTEREST_SUBMITTED" -> "BUSINESS_REVIEWING" -> "DISCUSSION" -> "DUE_DILIGENCE" -> "AGREEMENT" -> "COMPLETED" (or "DECLINED")
+  termsAccepted               Boolean         @default(true)
+  createdAt                   DateTime        @default(now())
+  updatedAt                   DateTime        @updatedAt
+
+  agreements                  InvestmentAgreement[]
+  messages                    InvestmentMessage[]
+}
+
+model InvestmentAgreement {
+  id                      String              @id @default(cuid())
+  interestId              String
+  interest                InvestmentInterest  @relation(fields: [interestId], references: [id], onDelete: Cascade)
+  investorUserId          String
+  investorUser            User                @relation("InvestorAgreements", fields: [investorUserId], references: [id], onDelete: Cascade)
+  businessProfileId       String
+  businessProfile         BusinessProfile     @relation(fields: [businessProfileId], references: [id], onDelete: Cascade)
+  agreementType           String              // "FIXED_RETURN_DEBT", "EQUITY_PARTNERSHIP"
+  principalOrAmount       Float               // In INR
+  indicativeTerms         String              // Detailed clauses and terms text
+  repaymentSchedule       String?             // JSON schedule of payments for fixed-return
+  equityPercentage        Float?              // For equity
+  valuation               Float?              // Pre/Post money valuation
+  rightsAndCovenants      String?             // Information rights, voting, observer
+  disclosuresAcknowledged Boolean             @default(true)
+  status                  String              @default("DRAFT_INDICATIVE")
+  // Pipeline: "DRAFT_INDICATIVE" -> "PENDING_INVESTOR_SIGN" -> "PENDING_FOUNDER_SIGN" -> "EXECUTED" -> "COMPLETED"
+  investorSignedAt        DateTime?
+  businessSignedAt        DateTime?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   // "INTEREST", "AGREEMENT", "VERIFICATION", "SYSTEM", "DOCUMENT", "PAYMENT"
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model InvestmentMessage {
+  id          String              @id @default(cuid())
+  interestId  String
+  interest    InvestmentInterest  @relation(fields: [interestId], references: [id], onDelete: Cascade)
+  senderId    String
+  sender      User                @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  recipientId String
+  recipient   User                @relation("ReceivedMessages", fields: [recipientId], references: [id], onDelete: Cascade)
+  content     String
+  createdAt   DateTime            @default(now())
+}
+
 model RiskFlag {
   id                String          @id @default(cuid())
   businessProfileId String
@@ -175,8 +280,8 @@ model AuditLog {
   id            String   @id @default(cuid())
   adminId       String
   admin         User     @relation(fields: [adminId], references: [id], onDelete: Cascade)
-  action        String   // "APPROVE_OPPORTUNITY", "VERIFY_METRIC", "UPDATE_STATUS", "CHANGE_WEIGHTS", "ADD_RISK_FLAG"
-  entityType    String   // "BUSINESS_PROFILE", "DOCUMENT", "CONFIG", "USER"
+  action        String   // "APPROVE_OPPORTUNITY", "VERIFY_METRIC", "UPDATE_STATUS", "CHANGE_WEIGHTS", "ADD_RISK_FLAG", "VERIFY_AGREEMENT"
+  entityType    String   // "BUSINESS_PROFILE", "DOCUMENT", "CONFIG", "USER", "AGREEMENT"
   entityId      String
   previousValue String?  // JSON string
   newValue      String?  // JSON string
@@ -197,7 +302,7 @@ model MatchingConfig {
 
 model AnalyticsEvent {
   id        String   @id @default(cuid())
-  eventType String   // "REGISTRATION", "ONBOARDING_COMPLETE", "BUSINESS_SUBMISSION", "OPPORTUNITY_VIEW", "WATCHLIST_ADD", "COMPARISON_USE", "INFO_REQUEST"
+  eventType String   // "REGISTRATION", "ONBOARDING_COMPLETE", "BUSINESS_SUBMISSION", "OPPORTUNITY_VIEW", "WATCHLIST_ADD", "COMPARISON_USE", "INFO_REQUEST", "EXPRESS_INTEREST", "AGREEMENT_INITIATED"
   userId    String?
   entityId  String?
   metadata  String?  // JSON string
