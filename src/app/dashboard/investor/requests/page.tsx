@@ -17,8 +17,13 @@ import {
   ChevronDown,
   ChevronUp,
   Check,
-  Coins
+  Coins,
+  Scroll,
+  PenTool,
+  Printer,
+  Award
 } from 'lucide-react';
+import { DeedExecutionModal } from '@/components/DeedExecutionModal';
 
 export default function InvestorRequestsPage() {
   const [activeTab, setActiveTab] = useState<'INTERESTS' | 'INQUIRIES'>('INTERESTS');
@@ -36,6 +41,10 @@ export default function InvestorRequestsPage() {
   // Inquiries state
   const [requests, setRequests] = useState<any[]>([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
+
+  // Formal Deed Execution modal state
+  const [selectedDeed, setSelectedDeed] = useState<any | null>(null);
+  const [deedModalOpen, setDeedModalOpen] = useState(false);
 
   const fetchInterests = async () => {
     try {
@@ -298,40 +307,68 @@ export default function InvestorRequestsPage() {
                         </div>
                       </div>
 
-                      {/* Indicative Agreement Section if Created */}
+                      {/* Indicative Agreement & Formal Deed Section */}
                       {agreement && (
-                        <div className="p-5 bg-emerald-50/60 rounded-2xl border border-emerald-200 text-xs space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-emerald-900 flex items-center gap-1.5">
-                              <FileCheck className="w-4 h-4 text-emerald-700" />
-                              Indicative Term Sheet ({formatINR(agreement.principalOrAmount)})
-                            </span>
-                            <span className="font-bold text-[11px] text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
-                              {agreement.status}
-                            </span>
-                          </div>
-
-                          <div className="bg-white p-3 rounded-xl border border-emerald-100 text-[11px] text-slate-700 whitespace-pre-line font-mono">
-                            {agreement.indicativeTerms}
-                          </div>
-
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
-                            <div className="text-[11px] text-slate-500">
-                              Investor Signed: {agreement.investorSignedAt ? '✓ Yes' : 'Pending Signature'} • Founder Signed: {agreement.businessSignedAt ? '✓ Yes' : 'Pending Signature'}
+                        <div className="p-5 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 rounded-2xl border-2 border-emerald-300 text-xs space-y-3.5 shadow-xs">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold">
+                                {agreement.formalDeedType ? <Scroll className="w-4 h-4" /> : <FileCheck className="w-4 h-4" />}
+                              </div>
+                              <div>
+                                <span className="font-bold text-slate-900 block text-xs">
+                                  {agreement.formalDeedType
+                                    ? (item.businessProfile.investmentModel === 'FIXED_RETURN'
+                                        ? 'Loan & Debenture Deed (Formal Deed)'
+                                        : "Shareholders' Agreement (SHA)")
+                                    : `Indicative Term Sheet (${formatINR(agreement.principalOrAmount)})`}
+                                </span>
+                                <span className="text-[10px] text-slate-500">
+                                  {agreement.agreementStage === 'FORMAL_DEED' ? 'Stage 2: Formal Binding Deed' : 'Stage 1: Preliminary Indicative Terms'}
+                                </span>
+                              </div>
                             </div>
 
-                            {!agreement.investorSignedAt ? (
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`font-bold text-[10px] px-2.5 py-0.5 rounded-full ${
+                                  agreement.status === 'EXECUTED'
+                                    ? 'bg-emerald-200 text-emerald-900'
+                                    : 'bg-amber-100 text-amber-800'
+                                }`}
+                              >
+                                {agreement.status === 'EXECUTED' ? '✓ EXECUTED ONLINE' : agreement.status.replace(/_/g, ' ')}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="bg-white p-3.5 rounded-xl border border-emerald-100 text-[11px] text-slate-700 whitespace-pre-line font-mono max-h-36 overflow-y-auto">
+                            {agreement.formalDeedContent || agreement.indicativeTerms}
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-emerald-100/80">
+                            <div className="text-[11px] text-slate-600 flex items-center gap-2">
+                              <span>Investor E-Sign: {agreement.investorSignedAt ? '✓ Signed' : 'Pending'}</span>
+                              <span>•</span>
+                              <span>Founder E-Sign: {agreement.businessSignedAt ? '✓ Signed' : 'Pending'}</span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
                               <button
-                                onClick={() => handleSignAgreement(agreement.id)}
+                                onClick={() => {
+                                  setSelectedDeed(agreement);
+                                  setDeedModalOpen(true);
+                                }}
                                 className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5"
                               >
-                                <Check className="w-3.5 h-3.5" /> Sign Indicative Term Sheet
+                                <PenTool className="w-3.5 h-3.5" />
+                                {agreement.status === 'EXECUTED'
+                                  ? 'View & Print Deed'
+                                  : agreement.agreementStage === 'FORMAL_DEED'
+                                  ? 'Complete Online E-Sign'
+                                  : 'Review & Promote to Deed'}
                               </button>
-                            ) : (
-                              <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> You Signed this Term Sheet
-                              </span>
-                            )}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -493,6 +530,30 @@ export default function InvestorRequestsPage() {
           </div>
         )}
       </div>
+
+      {/* Formal Deed Execution & E-Sign Modal */}
+      {selectedDeed && (
+        <DeedExecutionModal
+          isOpen={deedModalOpen}
+          onClose={() => {
+            setDeedModalOpen(false);
+            setSelectedDeed(null);
+          }}
+          agreement={selectedDeed}
+          currentUserId=""
+          currentUserRole="INVESTOR"
+          onAgreementUpdated={() => {
+            fetchInterests();
+            if (selectedDeed?.id) {
+              fetch(`/api/agreements?id=${selectedDeed.id}`)
+                .then((r) => r.json())
+                .then((d) => {
+                  if (d.agreements?.[0]) setSelectedDeed(d.agreements[0]);
+                });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -227,6 +227,18 @@ model InvestmentAgreement {
   // Pipeline: "DRAFT_INDICATIVE" -> "PENDING_INVESTOR_SIGN" -> "PENDING_FOUNDER_SIGN" -> "EXECUTED" -> "COMPLETED"
   investorSignedAt        DateTime?
   businessSignedAt        DateTime?
+  agreementStage          String              @default("INDICATIVE_TERM_SHEET") // "INDICATIVE_TERM_SHEET", "FORMAL_DEED"
+  formalDeedType          String?             // "LOAN_DEBENTURE_DEED", "SHAREHOLDERS_AGREEMENT"
+  formalDeedContent       String?             // Comprehensive multi-clause legal deed
+  investorLegalName       String?
+  investorPan             String?
+  investorDesignation     String?
+  investorSignatureHash   String?
+  businessLegalName       String?
+  businessPan             String?
+  businessDesignation     String?
+  businessSignatureHash   String?
+  executionCertificateId  String?
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt
 }

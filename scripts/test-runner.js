@@ -468,7 +468,7 @@ async function runTests() {
     });
     assert(updatedInterest.status === 'DUE_DILIGENCE', 'Interest advanced to DUE_DILIGENCE stage');
 
-    // Create indicative agreement
+    // 1. Create Indicative Term Sheet (Stage 1)
     const testAgreement = await db.investmentAgreement.create({
       data: {
         interestId: testInterest.id,
@@ -476,22 +476,60 @@ async function runTests() {
         businessProfileId: testFixedDeal.id,
         agreementType: 'FIXED_RETURN_DEBT',
         principalOrAmount: 500000,
-        indicativeTerms: 'Indicative senior secured loan facility terms.',
+        indicativeTerms: 'INDICATIVE TERM SHEET: FIXED RETURN FACILITY\n1. Principal: ₹5,00,000\n2. Coupon: 16% p.a.',
+        agreementStage: 'INDICATIVE_TERM_SHEET',
         status: 'DRAFT_INDICATIVE',
       },
     });
-    assert(testAgreement.status === 'DRAFT_INDICATIVE', 'Indicative term sheet agreement drafted');
+    assert(testAgreement.status === 'DRAFT_INDICATIVE', 'Stage 1: Indicative term sheet agreement drafted');
+    assert(testAgreement.agreementStage === 'INDICATIVE_TERM_SHEET', 'Agreement is at Indicative Term Sheet stage');
 
-    // Both parties sign
-    const executedAgreement = await db.investmentAgreement.update({
+    // 2. Promote to Formal Loan & Debenture Deed (Stage 2)
+    const promotedDeed = await db.investmentAgreement.update({
+      where: { id: testAgreement.id },
+      data: {
+        agreementStage: 'FORMAL_DEED',
+        formalDeedType: 'LOAN_DEBENTURE_DEED',
+        formalDeedContent: 'DEED OF SECURED LOAN & DEBENTURE FACILITY\n1. FACILITY AMOUNT: ₹5,00,000\n2. COUPON: 16% p.a.\n3. ROC CHARGE: Form CHG-1 filing within 30 days.',
+        status: 'PENDING_INVESTOR_SIGN',
+      },
+    });
+    assert(promotedDeed.agreementStage === 'FORMAL_DEED', 'Stage 2: Promoted to Formal Legal Deed');
+    assert(promotedDeed.formalDeedType === 'LOAN_DEBENTURE_DEED', 'Formal deed type is Loan & Debenture Deed');
+    assert(promotedDeed.formalDeedContent.includes('ROC CHARGE'), 'Deed includes statutory ROC charge covenants');
+
+    // 3. Online Digital Signing Ceremony: Investor E-Signs
+    const investorSigned = await db.investmentAgreement.update({
       where: { id: testAgreement.id },
       data: {
         investorSignedAt: new Date(),
+        investorLegalName: 'Vikram Mehta',
+        investorPan: 'ABCDE1234F',
+        investorDesignation: 'Angel Investor / Capital Partner',
+        investorSignatureHash: 'HASH_INVESTOR_SIGNATURE_VERIFIED_SHA256',
+        status: 'PENDING_FOUNDER_SIGN',
+      },
+    });
+    assert(investorSigned.status === 'PENDING_FOUNDER_SIGN', 'Investor completed online digital signature ceremony');
+    assert(!!investorSigned.investorSignatureHash, 'Investor signature hash generated and persisted');
+
+    // 4. Online Digital Signing Ceremony: Founder E-Signs -> EXECUTED & BINDING
+    const certId = `VST-EXEC-${testAgreement.id.slice(-6).toUpperCase()}-2026`;
+    const fullyExecuted = await db.investmentAgreement.update({
+      where: { id: testAgreement.id },
+      data: {
         businessSignedAt: new Date(),
+        businessLegalName: 'Anil Kumar',
+        businessPan: 'XYZPA5678K',
+        businessDesignation: 'Founder & Director, CleanTech Pvt Ltd',
+        businessSignatureHash: 'HASH_FOUNDER_SIGNATURE_VERIFIED_SHA256',
+        executionCertificateId: certId,
         status: 'EXECUTED',
       },
     });
-    assert(executedAgreement.status === 'EXECUTED', 'Both parties executed the indicative agreement');
+    assert(fullyExecuted.status === 'EXECUTED', 'Both parties executed the formal deed online');
+    assert(fullyExecuted.executionCertificateId === certId, `Digital execution certificate issued: ${certId}`);
+    assert(!!fullyExecuted.businessSignatureHash && !!fullyExecuted.investorSignatureHash, 'Both cryptographic digital signature hashes verified');
 
     // Cleanup test interest & agreement
     await db.investmentAgreement.delete({ where: { id: testAgreement.id } });

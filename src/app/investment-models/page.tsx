@@ -136,6 +136,13 @@ export default function InvestmentModelsPage() {
                 </p>
               </div>
 
+              <div className="border border-emerald-200 p-3.5 rounded-xl bg-emerald-50/70 text-emerald-950">
+                <span className="font-bold block mb-1">Agreement Format &amp; Online Execution:</span>
+                <p className="text-slate-700">
+                  <strong>Indicative Term Sheet &rarr; Loan / Debenture Deed</strong>. Fully completed online by investors and founders with digital signatures, repayment schedules, and ROC charge covenants.
+                </p>
+              </div>
+
               <div className="border border-amber-200/80 p-3.5 rounded-xl bg-amber-50 text-amber-900">
                 <span className="font-bold block mb-1 flex items-center gap-1.5">
                   <AlertTriangle className="w-4 h-4 text-amber-600" /> Risk Disclosure:
@@ -193,6 +200,13 @@ export default function InvestmentModelsPage() {
                 <span className="font-bold text-slate-900 block mb-1">Investor Rights &amp; Governance:</span>
                 <p className="text-slate-600">
                   Comprehensive Shareholders Agreement (SHA) terms including quarterly audited financial statements, board observer privileges, tag-along rights, and anti-dilution provisions.
+                </p>
+              </div>
+
+              <div className="border border-indigo-200 p-3.5 rounded-xl bg-indigo-50/70 text-indigo-950">
+                <span className="font-bold block mb-1">Agreement Format &amp; Online Execution:</span>
+                <p className="text-slate-700">
+                  <strong>Indicative Term Sheet &rarr; Shareholders Agreement (SHA)</strong>. Fully completed online by investors and founders with digital signatures, affirmative covenants, and ROC PAS-3 allotment terms.
                 </p>
               </div>
 
@@ -418,6 +432,11 @@ export default function InvestmentModelsPage() {
                 <td className="py-3.5 px-4 font-semibold text-slate-900">Agreement Format</td>
                 <td className="py-3.5 px-4">Indicative Term Sheet &rarr; Loan / Debenture Deed</td>
                 <td className="py-3.5 px-4">Indicative Term Sheet &rarr; Shareholders Agreement (SHA)</td>
+              </tr>
+              <tr>
+                <td className="py-3.5 px-4 font-semibold text-slate-900">Online Execution</td>
+                <td className="py-3.5 px-4 text-emerald-700 font-semibold">100% Online Digital E-Signing &amp; ROC Charge Registry</td>
+                <td className="py-3.5 px-4 text-indigo-700 font-semibold">100% Online Digital E-Signing &amp; Board PAS-3 Allotment</td>
               </tr>
             </tbody>
           </table>

@@ -19,8 +19,13 @@ import {
   AlertCircle,
   FileCheck,
   Check,
-  X
+  X,
+  Scroll,
+  PenTool,
+  Award,
+  Printer
 } from 'lucide-react';
+import { DeedExecutionModal } from '@/components/DeedExecutionModal';
 
 export default function BusinessRequestsPage() {
   const [activeTab, setActiveTab] = useState<'INTERESTS' | 'INQUIRIES'>('INTERESTS');
@@ -30,12 +35,17 @@ export default function BusinessRequestsPage() {
   const [loadingInterests, setLoadingInterests] = useState(true);
   const [updatingStatusId, setUpdatingStatusId] = useState<string | null>(null);
 
-  // Term Sheet Draft Modal
+  // Term Sheet & Formal Deed Draft Modal
   const [draftModalOpen, setDraftModalOpen] = useState(false);
   const [activeInterest, setActiveInterest] = useState<any | null>(null);
   const [draftPrincipal, setDraftPrincipal] = useState<number>(500000);
   const [draftTerms, setDraftTerms] = useState<string>('');
   const [drafting, setDrafting] = useState(false);
+  const [createDirectDeed, setCreateDirectDeed] = useState(false);
+
+  // Formal Deed Execution modal state
+  const [selectedDeed, setSelectedDeed] = useState<any | null>(null);
+  const [deedModalOpen, setDeedModalOpen] = useState(false);
 
   // Discussion Messages state
   const [expandedInterestId, setExpandedInterestId] = useState<string | null>(null);
@@ -107,10 +117,11 @@ export default function BusinessRequestsPage() {
   const handleOpenDraftModal = (interest: any) => {
     setActiveInterest(interest);
     setDraftPrincipal(interest.intendedAmount);
+    setCreateDirectDeed(false);
     setDraftTerms(
       interest.investmentModel === 'FIXED_RETURN'
-        ? `NON-BINDING INDICATIVE TERM SHEET: FIXED RETURN FACILITY\n1. Principal: ₹${interest.intendedAmount.toLocaleString('en-IN')}\n2. Proposed Coupon: 16% p.a.\n3. Tenure: 24 Months\n4. Frequency: Monthly Amortization\n5. Collateral: First hypothecation charge on enterprise machinery and PPA receivables.`
-        : `NON-BINDING INDICATIVE TERM SHEET: DIRECT EQUITY PARTNERSHIP\n1. Check Size: ₹${interest.intendedAmount.toLocaleString('en-IN')}\n2. Pre-Money Valuation: ₹8,00,00,000\n3. Equity Pool Allocation: 10%\n4. Governance Rights: Information rights, quarterly audited MIS, observer seat.`
+        ? `INDICATIVE TERM SHEET: FIXED RETURN FACILITY\n1. Principal: ₹${interest.intendedAmount.toLocaleString('en-IN')}\n2. Proposed Coupon: 16% p.a.\n3. Tenure: 24 Months\n4. Frequency: Monthly Amortization\n5. Collateral: First hypothecation charge on enterprise machinery and commercial receivables.\n6. Next Step: Promote to formal Loan & Debenture Deed upon bilateral assent.`
+        : `INDICATIVE TERM SHEET: DIRECT EQUITY PARTNERSHIP\n1. Check Size: ₹${interest.intendedAmount.toLocaleString('en-IN')}\n2. Pre-Money Valuation: ₹8,00,00,000\n3. Equity Pool Allocation: 10%\n4. Governance Rights: Information rights, quarterly audited MIS, observer seat.\n5. Next Step: Promote to formal Shareholders' Agreement (SHA) upon bilateral assent.`
     );
     setDraftModalOpen(true);
   };
@@ -130,6 +141,7 @@ export default function BusinessRequestsPage() {
               : 'EQUITY_PARTNERSHIP',
           principalOrAmount: Number(draftPrincipal),
           indicativeTerms: draftTerms,
+          directPromoteToDeed: createDirectDeed,
         }),
       });
 
@@ -402,36 +414,68 @@ export default function BusinessRequestsPage() {
                         </div>
                       )}
 
-                      {/* Indicative Agreement Section if Created */}
+                      {/* Indicative Agreement & Formal Deed Section */}
                       {agreement && (
-                        <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200 text-xs space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-emerald-900 flex items-center gap-1.5">
-                              <FileCheck className="w-4 h-4 text-emerald-700" />
-                              Indicative Term Sheet ({formatINR(agreement.principalOrAmount)})
-                            </span>
-                            <span className="font-bold text-[11px] text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
-                              Status: {agreement.status}
-                            </span>
-                          </div>
-
-                          <div className="bg-white p-3 rounded-xl border border-emerald-100 text-[11px] text-slate-700 whitespace-pre-line font-mono">
-                            {agreement.indicativeTerms}
-                          </div>
-
-                          <div className="flex items-center justify-between pt-1">
-                            <div className="text-[11px] text-slate-500">
-                              Investor Signed: {agreement.investorSignedAt ? '✓ Yes' : 'Pending'} • Founder Signed: {agreement.businessSignedAt ? '✓ Yes' : 'Pending'}
+                        <div className="p-5 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 rounded-2xl border-2 border-emerald-300 text-xs space-y-3.5 shadow-xs">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold">
+                                {agreement.formalDeedType ? <Scroll className="w-4 h-4" /> : <FileCheck className="w-4 h-4" />}
+                              </div>
+                              <div>
+                                <span className="font-bold text-slate-900 block text-xs">
+                                  {agreement.formalDeedType
+                                    ? (item.investmentModel === 'FIXED_RETURN'
+                                        ? 'Loan & Debenture Deed (Formal Deed)'
+                                        : "Shareholders' Agreement (SHA)")
+                                    : `Indicative Term Sheet (${formatINR(agreement.principalOrAmount)})`}
+                                </span>
+                                <span className="text-[10px] text-slate-500">
+                                  {agreement.agreementStage === 'FORMAL_DEED' ? 'Stage 2: Formal Binding Deed' : 'Stage 1: Preliminary Indicative Terms'}
+                                </span>
+                              </div>
                             </div>
 
-                            {!agreement.businessSignedAt && (
-                              <button
-                                onClick={() => handleSignAgreement(agreement.id)}
-                                className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs transition flex items-center gap-1"
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`font-bold text-[10px] px-2.5 py-0.5 rounded-full ${
+                                  agreement.status === 'EXECUTED'
+                                    ? 'bg-emerald-200 text-emerald-900'
+                                    : 'bg-amber-100 text-amber-800'
+                                }`}
                               >
-                                <Check className="w-3.5 h-3.5" /> Sign Indicative Term Sheet
+                                {agreement.status === 'EXECUTED' ? '✓ EXECUTED ONLINE' : agreement.status.replace(/_/g, ' ')}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="bg-white p-3.5 rounded-xl border border-emerald-100 text-[11px] text-slate-700 whitespace-pre-line font-mono max-h-36 overflow-y-auto">
+                            {agreement.formalDeedContent || agreement.indicativeTerms}
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-emerald-100/80">
+                            <div className="text-[11px] text-slate-600 flex items-center gap-2">
+                              <span>Investor E-Sign: {agreement.investorSignedAt ? '✓ Signed' : 'Pending'}</span>
+                              <span>•</span>
+                              <span>Founder E-Sign: {agreement.businessSignedAt ? '✓ Signed' : 'Pending'}</span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedDeed(agreement);
+                                  setDeedModalOpen(true);
+                                }}
+                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center justify-center gap-1.5"
+                              >
+                                <PenTool className="w-3.5 h-3.5" />
+                                {agreement.status === 'EXECUTED'
+                                  ? 'View & Print Deed'
+                                  : agreement.agreementStage === 'FORMAL_DEED'
+                                  ? 'Complete Online E-Sign'
+                                  : 'Review & Promote to Deed'}
                               </button>
-                            )}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -665,18 +709,53 @@ export default function BusinessRequestsPage() {
           </div>
         )}
 
-        {/* Modal: Draft Indicative Term Sheet */}
+        {/* Modal: Draft Indicative Term Sheet or Formal Deed */}
         {draftModalOpen && activeInterest && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
             <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100">
               <h3 className="text-lg font-bold text-slate-900 mb-1">
-                Draft Indicative Term Sheet
+                Draft Agreement / Legal Instrument
               </h3>
               <p className="text-xs text-slate-500 mb-4">
-                To: {activeInterest.investorUser?.name} • Model: {activeInterest.investmentModel}
+                To: {activeInterest.investorUser?.name} • Model: {activeInterest.investmentModel === 'FIXED_RETURN' ? 'Fixed Return / Debt' : 'Equity / Partnership'}
               </p>
 
               <div className="space-y-4">
+                {/* Agreement Format Selection */}
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Select Agreement Format:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setCreateDirectDeed(false)}
+                      className={`p-3 rounded-xl border text-left transition ${
+                        !createDirectDeed
+                          ? 'border-emerald-600 bg-emerald-50/70 text-emerald-950 font-bold'
+                          : 'border-slate-200 bg-slate-50 text-slate-600'
+                      }`}
+                    >
+                      <span className="block font-bold">1. Indicative Term Sheet</span>
+                      <span className="text-[10px] text-slate-500 font-normal">Core commercial terms &amp; schedule</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCreateDirectDeed(true)}
+                      className={`p-3 rounded-xl border text-left transition ${
+                        createDirectDeed
+                          ? 'border-blue-600 bg-blue-50/70 text-blue-950 font-bold'
+                          : 'border-slate-200 bg-slate-50 text-slate-600'
+                      }`}
+                    >
+                      <span className="block font-bold">
+                        2. {activeInterest.investmentModel === 'FIXED_RETURN' ? 'Loan / Debenture Deed' : 'Shareholders Agreement (SHA)'}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-normal">Direct formal deed for online E-Sign</span>
+                    </button>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Principal / Investment Check Amount (INR ₹) *
@@ -689,20 +768,25 @@ export default function BusinessRequestsPage() {
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
-                    Indicative Clauses &amp; Terms *
-                  </label>
-                  <textarea
-                    rows={8}
-                    value={draftTerms}
-                    onChange={(e) => setDraftTerms(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-emerald-500"
-                  />
-                </div>
+                {!createDirectDeed && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Indicative Clauses &amp; Terms *
+                    </label>
+                    <textarea
+                      rows={6}
+                      value={draftTerms}
+                      onChange={(e) => setDraftTerms(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-mono focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+                )}
 
-                <div className="p-3 bg-slate-50 rounded-xl text-[11px] text-slate-500 border border-slate-100">
-                  <strong>Non-Binding Notice:</strong> Indicative term sheets provide a structured framework for due diligence. Definitive binding contracts are executed offline by legal counsel.
+                <div className="p-3 bg-blue-50/60 rounded-xl text-[11px] text-blue-900 border border-blue-100 flex items-start gap-2">
+                  <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Online Digital Execution:</strong> Both parties can review clauses, promote to formal deeds, and affix digital signatures online under the Information Technology Act, 2000.
+                  </span>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-2">
@@ -717,9 +801,14 @@ export default function BusinessRequestsPage() {
                     type="button"
                     onClick={handleCreateAgreement}
                     disabled={drafting}
-                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition"
+                    className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5"
                   >
-                    {drafting ? 'Generating Sheet...' : 'Issue Term Sheet to Investor'}
+                    <PenTool className="w-3.5 h-3.5" />
+                    {drafting
+                      ? 'Generating...'
+                      : createDirectDeed
+                      ? `Create Formal ${activeInterest.investmentModel === 'FIXED_RETURN' ? 'Loan Deed' : 'SHA'} Deed`
+                      : 'Issue Indicative Term Sheet'}
                   </button>
                 </div>
               </div>
@@ -727,6 +816,30 @@ export default function BusinessRequestsPage() {
           </div>
         )}
       </div>
+
+      {/* Formal Deed Execution & E-Sign Modal */}
+      {selectedDeed && (
+        <DeedExecutionModal
+          isOpen={deedModalOpen}
+          onClose={() => {
+            setDeedModalOpen(false);
+            setSelectedDeed(null);
+          }}
+          agreement={selectedDeed}
+          currentUserId=""
+          currentUserRole="BUSINESS"
+          onAgreementUpdated={() => {
+            fetchInterests();
+            if (selectedDeed?.id) {
+              fetch(`/api/agreements?id=${selectedDeed.id}`)
+                .then((r) => r.json())
+                .then((d) => {
+                  if (d.agreements?.[0]) setSelectedDeed(d.agreements[0]);
+                });
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
