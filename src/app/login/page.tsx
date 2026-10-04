@@ -63,9 +63,9 @@ export default function LoginPage() {
       setPassword('Password123!');
       handleLogin(undefined, 'founder1@agripulse.demo', 'Password123!');
     } else if (demoRole === 'ADMIN') {
-      setEmail('admin@vestiq.com');
-      setPassword('Password123!');
-      handleLogin(undefined, 'admin@vestiq.com', 'Password123!');
+      setEmail('vestiq21@gmail.com');
+      setPassword('Vestiq@Launch2026!');
+      handleLogin(undefined, 'vestiq21@gmail.com', 'Vestiq@Launch2026!');
     }
   };
 
