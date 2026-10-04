@@ -53,7 +53,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoLogin = (demoRole: 'INVESTOR' | 'BUSINESS' | 'ADMIN') => {
+  const handleDemoLogin = (demoRole: 'INVESTOR' | 'BUSINESS' | 'FOUNDER' | 'COFOUNDER') => {
     if (demoRole === 'INVESTOR') {
       setEmail('investor@vestiq.com');
       setPassword('Password123!');
@@ -62,10 +62,14 @@ export default function LoginPage() {
       setEmail('founder1@agripulse.demo');
       setPassword('Password123!');
       handleLogin(undefined, 'founder1@agripulse.demo', 'Password123!');
-    } else if (demoRole === 'ADMIN') {
+    } else if (demoRole === 'FOUNDER') {
       setEmail('vestiq21@gmail.com');
       setPassword('Vestiq@Launch2026!');
       handleLogin(undefined, 'vestiq21@gmail.com', 'Vestiq@Launch2026!');
+    } else if (demoRole === 'COFOUNDER') {
+      setEmail('bhavana@vestiq.com');
+      setPassword('Vestiq@Bhavana2026!');
+      handleLogin(undefined, 'bhavana@vestiq.com', 'Vestiq@Bhavana2026!');
     }
   };
 
@@ -86,37 +90,58 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Demo Fast Logins Banner */}
-        <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              Demo Test Personas (One-Click)
+        {/* Executive Fast Sign-in Portals */}
+        <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm mb-6 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
+              Executive Leadership Desks
             </span>
+            <span className="text-[10px] text-blue-600 font-semibold">1-Click Access</span>
           </div>
-          <div className="grid grid-cols-3 gap-2 text-xs">
+
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {/* Founder Admin Button */}
             <button
               type="button"
-              onClick={() => handleDemoLogin('INVESTOR')}
-              className="p-2 rounded-xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100 text-blue-800 font-medium transition text-center"
+              onClick={() => handleDemoLogin('FOUNDER')}
+              className="p-3 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100/90 text-blue-900 font-medium transition text-left relative overflow-hidden group shadow-sm"
             >
-              <UserCheck className="w-4 h-4 mx-auto mb-1 text-blue-600" />
-              Investor
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-5 h-5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">
+                  BT
+                </div>
+                <span className="text-[10px] font-bold uppercase text-blue-700 tracking-wider">
+                  Founder Admin
+                </span>
+              </div>
+              <div className="font-bold text-slate-900 text-xs truncate">
+                BOLLOJU BHANU TEJA
+              </div>
+              <p className="text-[10px] text-blue-700/80 mt-0.5 truncate">
+                Core Tech &amp; Legal Deeds
+              </p>
             </button>
+
+            {/* Co-Founder Admin Button */}
             <button
               type="button"
-              onClick={() => handleDemoLogin('BUSINESS')}
-              className="p-2 rounded-xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100 text-emerald-800 font-medium transition text-center"
+              onClick={() => handleDemoLogin('COFOUNDER')}
+              className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100/90 text-emerald-900 font-medium transition text-left relative overflow-hidden group shadow-sm"
             >
-              <Briefcase className="w-4 h-4 mx-auto mb-1 text-emerald-600" />
-              Startup
-            </button>
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('ADMIN')}
-              className="p-2 rounded-xl border border-amber-200 bg-amber-50/60 hover:bg-amber-100 text-amber-800 font-medium transition text-center"
-            >
-              <Shield className="w-4 h-4 mx-auto mb-1 text-amber-600" />
-              Admin
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px]">
+                  BH
+                </div>
+                <span className="text-[10px] font-bold uppercase text-emerald-700 tracking-wider">
+                  Co-Founder Admin
+                </span>
+              </div>
+              <div className="font-bold text-slate-900 text-xs truncate">
+                BHAVANA
+              </div>
+              <p className="text-[10px] text-emerald-700/80 mt-0.5 truncate">
+                Operations &amp; Diligence
+              </p>
             </button>
           </div>
         </div>

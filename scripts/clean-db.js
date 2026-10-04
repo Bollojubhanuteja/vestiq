@@ -51,15 +51,28 @@ async function main() {
   });
   console.log('✓ Initialized default matching algorithm weights.');
 
-  // 3. Create the Official Founder Admin Account
-  const passwordHash = await bcrypt.hash('Vestiq@Launch2026!', 10);
-  const adminUser = await db.user.create({
+  // 3. Create Official Executive Admin Accounts
+  const founderPasswordHash = await bcrypt.hash('Vestiq@Launch2026!', 10);
+  const founderAdmin = await db.user.create({
     data: {
       email: 'vestiq21@gmail.com',
-      passwordHash,
+      passwordHash: founderPasswordHash,
       role: 'ADMIN',
-      name: 'Bhanu Teja (Vestiq Managing Director)',
+      name: 'BOLLOJU BHANU TEJA',
       phone: '+91 98765 00001',
+      country: 'India',
+      city: 'Hyderabad',
+    },
+  });
+
+  const coFounderPasswordHash = await bcrypt.hash('Vestiq@Bhavana2026!', 10);
+  const coFounderAdmin = await db.user.create({
+    data: {
+      email: 'bhavana@vestiq.com',
+      passwordHash: coFounderPasswordHash,
+      role: 'ADMIN',
+      name: 'BHAVANA',
+      phone: '+91 98765 00002',
       country: 'India',
       city: 'Hyderabad',
     },
@@ -68,19 +81,21 @@ async function main() {
   // Log clean platform initialization
   await db.auditLog.create({
     data: {
-      adminId: adminUser.id,
+      adminId: founderAdmin.id,
       action: 'PLATFORM_CLEANED_AND_INITIALIZED',
       entityType: 'PLATFORM',
       entityId: 'vestiq-prod',
       newValue: JSON.stringify({
-        message: 'All sample data removed. Platform is fresh, clean, and initialized for production.',
-        adminEmail: 'vestiq21@gmail.com',
+        message: 'All sample data removed. Executive accounts initialized for Founder and Co-Founder.',
+        founderEmail: 'vestiq21@gmail.com',
+        coFounderEmail: 'bhavana@vestiq.com',
         timestamp: new Date().toISOString(),
       }),
     },
   });
 
-  console.log('✓ Created official Admin account: vestiq21@gmail.com');
+  console.log('✓ Created official Founder Admin: BOLLOJU BHANU TEJA (vestiq21@gmail.com)');
+  console.log('✓ Created official Co-Founder Admin: BHAVANA (bhavana@vestiq.com)');
 
   // VACUUM database to wipe tombstoned pages and shrink file
   await db.$executeRawUnsafe('VACUUM;');

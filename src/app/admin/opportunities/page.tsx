@@ -98,10 +98,14 @@ export default function AdminOpportunitiesPage() {
         {/* Header */}
         <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-1.5">
               <Link href="/admin" className="text-xs font-semibold text-slate-500 hover:text-slate-800">
                 &larr; Admin Dashboard
               </Link>
+              <span className="text-slate-300">•</span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold uppercase tracking-wider">
+                Executive Portfolio: BHAVANA (Co-Founder &amp; Head of Operations)
+              </span>
             </div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
               Opportunity Verification &amp; Review Queue

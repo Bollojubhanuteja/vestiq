@@ -89,6 +89,11 @@ export default function AdminMatchingConfigPage() {
           <Link href="/admin" className="text-xs font-semibold text-slate-500 hover:text-slate-800 mb-2 inline-block">
             &larr; Admin Dashboard
           </Link>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[11px] font-bold uppercase tracking-wider">
+              Executive Portfolio: BOLLOJU BHANU TEJA (Founder &amp; Chief Platform Architect)
+            </span>
+          </div>
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             Matching Engine Weight Calibration
           </h1>
