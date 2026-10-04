@@ -108,39 +108,6 @@ export function Navbar() {
     } catch {}
   };
 
-  const handleQuickDemoLogin = async (role: 'INVESTOR' | 'BUSINESS_FIXED' | 'BUSINESS_EQUITY' | 'ADMIN') => {
-    let email = 'investor@vestiq.com';
-    let password = 'Investor@2026!';
-
-    if (role === 'ADMIN') {
-      email = 'vestiq21@gmail.com';
-      password = 'Vestiq@Launch2026!';
-    } else if (role === 'BUSINESS_FIXED') {
-      email = 'founder@zenithclean.demo';
-      password = 'Vestiq@Launch2026!';
-    } else if (role === 'BUSINESS_EQUITY') {
-      email = 'founder@auramed.demo';
-      password = 'Vestiq@Launch2026!';
-    }
-
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      if (res.ok) {
-        await fetchSession();
-        if (role === 'INVESTOR') router.push('/dashboard/investor');
-        else if (role === 'BUSINESS_FIXED' || role === 'BUSINESS_EQUITY') router.push('/dashboard/business');
-        else if (role === 'ADMIN') router.push('/admin');
-        router.refresh();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -207,46 +174,6 @@ export function Navbar() {
 
           {/* Right Action Area */}
           <div className="hidden lg:flex items-center gap-3">
-            {/* Quick Demo Switcher Pill */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg border border-slate-200/80 text-xs">
-              <span className="px-1.5 font-medium text-slate-500">Quick Test:</span>
-              <button
-                onClick={() => handleQuickDemoLogin('INVESTOR')}
-                className={`px-2 py-1 rounded transition font-medium ${
-                  user?.role === 'INVESTOR' ? 'bg-blue-600 text-white' : 'hover:bg-slate-200 text-slate-700'
-                }`}
-                title="Log in as Demo Institutional Investor (Vikramaditya)"
-              >
-                Investor
-              </button>
-              <button
-                onClick={() => handleQuickDemoLogin('BUSINESS_FIXED')}
-                className={`px-2 py-1 rounded transition font-medium ${
-                  user?.role === 'BUSINESS' && user?.email.includes('zenith') ? 'bg-emerald-600 text-white' : 'hover:bg-slate-200 text-slate-700'
-                }`}
-                title="Log in as Fixed Return Business Founder (Zenith CleanEnergy)"
-              >
-                Fixed Return
-              </button>
-              <button
-                onClick={() => handleQuickDemoLogin('BUSINESS_EQUITY')}
-                className={`px-2 py-1 rounded transition font-medium ${
-                  user?.role === 'BUSINESS' && user?.email.includes('auramed') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-200 text-slate-700'
-                }`}
-                title="Log in as Equity Business Founder (AuraMed Diagnostics)"
-              >
-                Equity
-              </button>
-              <button
-                onClick={() => handleQuickDemoLogin('ADMIN')}
-                className={`px-2 py-1 rounded transition font-medium ${
-                  user?.role === 'ADMIN' ? 'bg-amber-600 text-white' : 'hover:bg-slate-200 text-slate-700'
-                }`}
-                title="Log in as Platform Admin (Bhanu Teja)"
-              >
-                Admin
-              </button>
-            </div>
 
             {user ? (
               <div className="flex items-center gap-2">
@@ -508,48 +435,6 @@ export function Navbar() {
               About
             </Link>
           </nav>
-
-          <div className="pt-3 border-t border-slate-200">
-            <p className="text-xs font-semibold text-slate-500 mb-2">Quick Test Switcher:</p>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <button
-                onClick={() => {
-                  handleQuickDemoLogin('INVESTOR');
-                  setMobileMenuOpen(false);
-                }}
-                className="p-2 rounded bg-slate-100 font-medium text-slate-700 text-center"
-              >
-                Investor (Vikram)
-              </button>
-              <button
-                onClick={() => {
-                  handleQuickDemoLogin('BUSINESS_FIXED');
-                  setMobileMenuOpen(false);
-                }}
-                className="p-2 rounded bg-emerald-50 text-emerald-800 font-medium text-center"
-              >
-                Fixed Return (Zenith)
-              </button>
-              <button
-                onClick={() => {
-                  handleQuickDemoLogin('BUSINESS_EQUITY');
-                  setMobileMenuOpen(false);
-                }}
-                className="p-2 rounded bg-indigo-50 text-indigo-800 font-medium text-center"
-              >
-                Equity (AuraMed)
-              </button>
-              <button
-                onClick={() => {
-                  handleQuickDemoLogin('ADMIN');
-                  setMobileMenuOpen(false);
-                }}
-                className="p-2 rounded bg-amber-50 text-amber-800 font-medium text-center"
-              >
-                Admin (Bhanu Teja)
-              </button>
-            </div>
-          </div>
 
           <div className="pt-3 border-t border-slate-200">
             {user ? (

@@ -6,9 +6,13 @@ const path = require('path');
 const db = new PrismaClient();
 
 async function main() {
-  console.log('--- Cleaning previous demo data from Vestiq Database ---');
+  console.log('--- Cleaning all sample data from Vestiq Database ---');
 
-  // 1. Delete all demo records
+  // 1. Delete all sample records across all relations
+  await db.investmentMessage.deleteMany({});
+  await db.investmentAgreement.deleteMany({});
+  await db.investmentInterest.deleteMany({});
+  await db.notification.deleteMany({});
   await db.auditLog.deleteMany({});
   await db.riskFlag.deleteMany({});
   await db.adminNote.deleteMany({});
@@ -22,9 +26,9 @@ async function main() {
   await db.user.deleteMany({});
   await db.analyticsEvent.deleteMany({});
 
-  console.log('✓ Cleared all demo businesses, test investors, and sample records.');
+  console.log('✓ Successfully wiped all sample businesses, test investors, demo agreements, and sample records.');
 
-  // 2. Ensure Matching Config exists
+  // 2. Ensure Matching Configuration exists
   await db.matchingConfig.upsert({
     where: { id: 'default-config' },
     update: {
@@ -45,23 +49,23 @@ async function main() {
       riskWeight: 0.15,
     },
   });
-  console.log('✓ Verified default matching algorithm configuration.');
+  console.log('✓ Initialized default matching algorithm weights.');
 
-  // 3. Create Official Founder Admin Account
+  // 3. Create the Official Founder Admin Account
   const passwordHash = await bcrypt.hash('Vestiq@Launch2026!', 10);
   const adminUser = await db.user.create({
     data: {
       email: 'vestiq21@gmail.com',
       passwordHash,
       role: 'ADMIN',
-      name: 'Bhanu Teja (Vestiq Founder)',
+      name: 'Bhanu Teja (Vestiq Managing Director)',
       phone: '+91 98765 00001',
       country: 'India',
       city: 'Hyderabad',
     },
   });
 
-  // Log creation in audit log
+  // Log clean platform initialization
   await db.auditLog.create({
     data: {
       adminId: adminUser.id,
@@ -69,14 +73,14 @@ async function main() {
       entityType: 'PLATFORM',
       entityId: 'vestiq-prod',
       newValue: JSON.stringify({
-        message: 'All demo data removed. Platform initialized for live production operations.',
+        message: 'All sample data removed. Platform is fresh, clean, and initialized for production.',
         adminEmail: 'vestiq21@gmail.com',
         timestamp: new Date().toISOString(),
       }),
     },
   });
 
-  console.log('✓ Created official Admin account for vestiq21@gmail.com');
+  console.log('✓ Created official Admin account: vestiq21@gmail.com');
 
   // VACUUM database to wipe tombstoned pages and shrink file
   await db.$executeRawUnsafe('VACUUM;');
@@ -89,10 +93,14 @@ async function main() {
     const b64 = dbBuf.toString('base64');
     const outPath = path.join(process.cwd(), 'src', 'lib', 'initial-db.ts');
     fs.writeFileSync(outPath, `export const INITIAL_DB_BASE64 = '${b64}';\n`);
-    console.log(`✓ Synchronized src/lib/initial-db.ts (${b64.length} chars).`);
+    console.log(`✓ Synchronized src/lib/initial-db.ts (${b64.length} chars) for Vercel deployment.`);
   }
 
-  console.log('--- Database is now 100% clean and ready for real users! ---');
+  console.log('\n====================================================');
+  console.log('  VESTIQ DATABASE IS NOW 100% FRESH AND CLEAN!      ');
+  console.log('  Active Accounts: 1 (Official Admin: vestiq21@gmail.com)');
+  console.log('  Active Listings: 0 (Ready for real businesses)    ');
+  console.log('====================================================\n');
 }
 
 main()

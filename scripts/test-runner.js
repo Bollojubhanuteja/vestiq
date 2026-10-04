@@ -333,38 +333,95 @@ async function runTests() {
     // TEST 7: Two B2B Investment Models Verification
     // ----------------------------------------------------
     console.log('\nTEST SUITE 7: Two Structured Investment Models (Fixed Return vs Equity)');
-    const fixedReturnDeal = await db.businessProfile.findFirst({
-      where: { investmentModel: 'FIXED_RETURN', status: 'APPROVED' },
+    const testFixedDeal = await db.businessProfile.create({
+      data: {
+        userId: bizUser1.id,
+        companyName: 'Test Fixed Energy Private Limited',
+        founderName: 'Anil Test',
+        email: 'anil@testfixed.demo',
+        country: 'India',
+        city: 'Hyderabad',
+        industry: 'CleanTech',
+        businessStage: 'Growth',
+        businessDescription: 'Asset-backed clean energy deployment.',
+        problem: 'Commercial grid instability.',
+        solution: 'Battery storage micro-grids.',
+        businessModel: 'B2B subscription power-purchase.',
+        fundingRequirement: 7500000,
+        investmentModel: 'FIXED_RETURN',
+        minimumInvestment: 250000,
+        proposedReturnRate: 16.0,
+        investmentTenureMonths: 24,
+        expectedRepaymentAmount: 9900000,
+        repaymentFrequency: 'MONTHLY',
+        collateralDetails: 'Exclusive first charge on 48 DC fast-charging units registered with ROC.',
+        intendedUseOfFunds: 'Procurement of lithium cells.',
+        revenueStatus: '₹10L - ₹50L/mo',
+        profitabilityStatus: 'Profitable',
+        status: 'APPROVED',
+        verificationStatus: 'VERIFIED',
+        isPublished: true,
+      },
     });
-    assert(!!fixedReturnDeal, 'Option 1: Fixed return business deal exists in live database');
+    cleanupBusinessIds.push(testFixedDeal.id);
+
+    assert(testFixedDeal.investmentModel === 'FIXED_RETURN', 'Option 1: Fixed return business deal created');
     assert(
-      typeof fixedReturnDeal?.proposedReturnRate === 'number' && fixedReturnDeal.proposedReturnRate > 0,
-      `Option 1 has explicit return rate (% p.a.): ${fixedReturnDeal?.proposedReturnRate}%`
+      typeof testFixedDeal.proposedReturnRate === 'number' && testFixedDeal.proposedReturnRate > 0,
+      `Option 1 has explicit return rate (% p.a.): ${testFixedDeal.proposedReturnRate}%`
     );
     assert(
-      typeof fixedReturnDeal?.investmentTenureMonths === 'number' && fixedReturnDeal.investmentTenureMonths > 0,
-      `Option 1 has explicit tenure duration: ${fixedReturnDeal?.investmentTenureMonths} months`
+      typeof testFixedDeal.investmentTenureMonths === 'number' && testFixedDeal.investmentTenureMonths > 0,
+      `Option 1 has explicit tenure duration: ${testFixedDeal.investmentTenureMonths} months`
     );
     assert(
-      !!fixedReturnDeal?.collateralDetails,
-      `Option 1 specifies collateral / security details: "${fixedReturnDeal?.collateralDetails?.slice(0, 45)}..."`
+      !!testFixedDeal.collateralDetails,
+      `Option 1 specifies collateral / security details: "${testFixedDeal.collateralDetails.slice(0, 45)}..."`
     );
 
-    const equityDeal = await db.businessProfile.findFirst({
-      where: { investmentModel: 'EQUITY', status: 'APPROVED' },
+    const testEquityDeal = await db.businessProfile.create({
+      data: {
+        userId: bizUser2.id,
+        companyName: 'Test Equity Diagnostics Private Limited',
+        founderName: 'Pooja Test',
+        email: 'pooja@testequity.demo',
+        country: 'India',
+        city: 'Bengaluru',
+        industry: 'HealthTech',
+        businessStage: 'Growth',
+        businessDescription: 'AI oncology screening technology.',
+        problem: 'Late detection of cancer.',
+        solution: 'Automated digital pathology scanners.',
+        businessModel: 'Direct hospital recurring subscription.',
+        fundingRequirement: 12000000,
+        investmentModel: 'EQUITY',
+        minimumInvestment: 500000,
+        valuation: 80000000,
+        equityOffered: 13.04,
+        investorRights: 'Information rights, quarterly audited MIS, board observer seat.',
+        growthMetrics: '115% YoY revenue growth.',
+        intendedUseOfFunds: 'Regulatory CDSCO trials.',
+        revenueStatus: '₹50L+/mo',
+        profitabilityStatus: 'Profitable',
+        status: 'APPROVED',
+        verificationStatus: 'VERIFIED',
+        isPublished: true,
+      },
     });
-    assert(!!equityDeal, 'Option 2: Equity & partnership deal exists in live database');
+    cleanupBusinessIds.push(testEquityDeal.id);
+
+    assert(testEquityDeal.investmentModel === 'EQUITY', 'Option 2: Equity & partnership deal created');
     assert(
-      typeof equityDeal?.valuation === 'number' && equityDeal.valuation > 0,
-      `Option 2 has explicit pre-money valuation: ₹${(equityDeal?.valuation / 10000000).toFixed(2)} Cr`
+      typeof testEquityDeal.valuation === 'number' && testEquityDeal.valuation > 0,
+      `Option 2 has explicit pre-money valuation: ₹${(testEquityDeal.valuation / 10000000).toFixed(2)} Cr`
     );
     assert(
-      typeof equityDeal?.equityOffered === 'number' && equityDeal.equityOffered > 0,
-      `Option 2 has explicit equity pool percentage: ${equityDeal?.equityOffered}%`
+      typeof testEquityDeal.equityOffered === 'number' && testEquityDeal.equityOffered > 0,
+      `Option 2 has explicit equity pool percentage: ${testEquityDeal.equityOffered}%`
     );
     assert(
-      !!equityDeal?.investorRights,
-      `Option 2 specifies governance / investor covenants: "${equityDeal?.investorRights?.slice(0, 45)}..."`
+      !!testEquityDeal.investorRights,
+      `Option 2 specifies governance / investor covenants: "${testEquityDeal.investorRights.slice(0, 45)}..."`
     );
 
     // ----------------------------------------------------
@@ -374,7 +431,7 @@ async function runTests() {
     const testInterest = await db.investmentInterest.create({
       data: {
         investorUserId: invUser1.id,
-        businessProfileId: fixedReturnDeal.id,
+        businessProfileId: testFixedDeal.id,
         investmentModel: 'FIXED_RETURN',
         intendedAmount: 500000,
         ownershipOrReturnProposed: '16.0% Fixed IRR',
@@ -396,7 +453,7 @@ async function runTests() {
       data: {
         interestId: testInterest.id,
         investorUserId: invUser1.id,
-        businessProfileId: fixedReturnDeal.id,
+        businessProfileId: testFixedDeal.id,
         agreementType: 'FIXED_RETURN_DEBT',
         principalOrAmount: 500000,
         indicativeTerms: 'Indicative senior secured loan facility terms.',
