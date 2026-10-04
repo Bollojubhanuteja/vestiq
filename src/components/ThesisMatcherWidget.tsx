@@ -274,7 +274,7 @@ export function ThesisMatcherWidget() {
               {/* Informational reassurance */}
               <div className="mt-6 pt-4 border-t border-slate-800 flex items-center gap-2 text-[11px] text-slate-400">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Deterministic rule-based score calculation • Non-custodial research tool</span>
+                <span>Deterministic rule-based score calculation • Verified matching engine</span>
               </div>
             </div>
 
@@ -523,7 +523,7 @@ export function ThesisMatcherWidget() {
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
                 <div className="text-center text-[10px] text-slate-400">
-                  No fees to submit • Zero equity taken • Strict non-custodial diligence
+                  No upfront fees • Verified listing • Direct investor discovery
                 </div>
               </div>
             </div>

@@ -292,7 +292,7 @@ export function ExpressInterestModal({
               <div className="flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <p className="text-[11px] text-amber-900 leading-relaxed font-medium">
-                  <strong>Risk Disclosure & Non-Custodial Facilitation:</strong> Investments in unlisted businesses and private debt carry substantial commercial, market, and liquidity risks. Expected returns or valuation multiples are indicative, non-guaranteed targets. Vestiq facilitates verified discovery and documentation; Vestiq does not hold client capital or guarantee repayment.
+                  <strong>Risk &amp; Agreement Terms:</strong> Investments in private businesses carry commercial and liquidity risks. Proposed returns or equity percentages are structured through formal agreements. Ensure you review all term sheets and legal covenants before final execution.
                 </p>
               </div>
 

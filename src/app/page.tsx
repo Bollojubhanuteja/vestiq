@@ -149,9 +149,9 @@ export default async function HomePage() {
               <span className="text-[11px] text-slate-400 mt-0.5 block">Direct Q&amp;A &amp; Data Rooms</span>
             </div>
             <div className="bg-slate-900/80 border border-slate-800 p-4 rounded-xl backdrop-blur">
-              <span className="block text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Non-Custodial</span>
-              <span className="text-sm font-bold text-white mt-1 block">Bilateral Settlement</span>
-              <span className="text-[11px] text-slate-400 mt-0.5 block">Zero blind pooling</span>
+              <span className="block text-[11px] uppercase tracking-wider text-slate-400 font-semibold">Deal Execution</span>
+              <span className="text-sm font-bold text-white mt-1 block">Direct Agreements</span>
+              <span className="text-[11px] text-slate-400 mt-0.5 block">Structured deal terms</span>
             </div>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default async function HomePage() {
               How Vestiq Connects Capital &amp; Enterprise
             </h2>
             <p className="mt-2 text-sm text-slate-600">
-              A transparent, non-custodial milestone pipeline from business listing to verified bilateral agreement.
+              A transparent milestone pipeline from business listing to verified partnership agreement.
             </p>
           </div>
 
@@ -514,26 +514,14 @@ export default async function HomePage() {
 
               <div className="bg-slate-800/80 p-5 rounded-2xl border border-slate-700/80">
                 <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs mb-1">
-                  <CheckCircle2 className="w-4 h-4" /> 4. Non-Custodial Facilitation
+                  <CheckCircle2 className="w-4 h-4" /> 4. Agreement &amp; Capital Execution
                 </div>
                 <p className="text-xs text-slate-300">
-                  All transactions settle directly between verified parties via designated escrow/commercial accounts.
+                  Execute binding contracts, structured disbursements, and transparent profit or equity terms.
                 </p>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Regulatory & Risk Disclosures Footer Banner */}
-      <section className="py-6 bg-slate-950 text-slate-400 text-xs border-t border-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-1">
-          <p>
-            <strong>Regulatory &amp; Non-Custodial Notice:</strong> Vestiq operates as a factual information discovery and due-diligence communication platform in India. Vestiq is not a stock exchange, broker-dealer, investment advisor, or portfolio manager under SEBI regulations. Vestiq does not pool funds, hold client money, or guarantee returns.
-          </p>
-          <p className="text-[11px] text-slate-500">
-            All expressions of interest represent non-binding preliminary indicators. Final capital transactions must be executed through definitive, legally binding contracts between the respective parties.
-          </p>
         </div>
       </section>
     </div>

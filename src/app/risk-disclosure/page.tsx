@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { AlertTriangle, ShieldAlert, ArrowLeft, FileText, CheckCircle2 } from 'lucide-react';
 
 export const metadata = {
-  title: 'Risk Disclosure & Non-Brokerage Notice | Vestiq',
+  title: 'Risk Disclosure & Platform Notice | Vestiq',
   description:
-    'Important regulatory and risk disclosure statement regarding private investment discovery, non-custodial software, and preference match scores.',
+    'Important regulatory and risk disclosure statement regarding business investments, profit sharing, and preference match scores.',
 };
 
 export default function RiskDisclosurePage() {

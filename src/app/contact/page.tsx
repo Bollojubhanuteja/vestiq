@@ -52,9 +52,9 @@ export default function ContactPage() {
 
             <div className="p-6 rounded-2xl bg-blue-50/50 border border-blue-100 text-xs text-blue-900">
               <ShieldCheck className="w-4 h-4 text-blue-600 mb-2" />
-              <p className="font-semibold mb-1">Legal Notice:</p>
+              <p className="font-semibold mb-1">Platform Inquiries:</p>
               <p className="leading-relaxed">
-                Vestiq is a non-custodial software discovery platform. We do not provide financial advice, broker investments, or accept deposits.
+                Connect with our partnership and compliance team for onboarding, verification, or enterprise inquiries.
               </p>
             </div>
           </div>
