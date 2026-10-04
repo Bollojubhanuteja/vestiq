@@ -51,6 +51,63 @@ export default function AboutPage() {
           </p>
         </div>
 
+        {/* Founding Leadership Section */}
+        <div className="mt-16 pt-12 border-t border-slate-200">
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-600 mb-2 block">
+              Leadership &amp; Founding Team
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+              Meet the Visionaries Behind Vestiq
+            </h2>
+            <p className="mt-2 text-sm text-slate-600 max-w-xl mx-auto">
+              Driven by a shared mission to institutionalize private venture investment and growth debt for Indian businesses.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {/* Founder Card */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 relative overflow-hidden shadow-sm hover:shadow-md transition">
+              <div className="w-1.5 h-full bg-blue-600 absolute left-0 top-0" />
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-700 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                  BT
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-100/70 border border-blue-200 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                    Founder
+                  </span>
+                  <h3 className="text-lg font-bold text-slate-950">BOLLOJU BHANU TEJA</h3>
+                  <p className="text-xs text-slate-500 font-medium">Founder &amp; Platform Architect</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Leading platform architecture, legal engineering, and the core vision of connecting verified Indian MSMEs and startups with strategic capital partners through transparent due diligence and digital execution.
+              </p>
+            </div>
+
+            {/* Co-Founder Card */}
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 relative overflow-hidden shadow-sm hover:shadow-md transition">
+              <div className="w-1.5 h-full bg-emerald-600 absolute left-0 top-0" />
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+                  BH
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-100/70 border border-emerald-200 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                    Co-Founder
+                  </span>
+                  <h3 className="text-lg font-bold text-slate-950">BHAVANA</h3>
+                  <p className="text-xs text-slate-500 font-medium">Co-Founder &amp; Strategic Operations</p>
+                </div>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Spearheading founder ecosystems, investor onboarding workflows, business verification operations, and strategic growth initiatives across key Indian enterprise sectors.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <div className="mt-12 pt-8 border-t border-slate-200 flex justify-between items-center text-xs text-slate-500">
           <span>Platform Version: 1.0 (MVP)</span>
           <Link href="/explore" className="text-blue-600 font-semibold hover:underline">

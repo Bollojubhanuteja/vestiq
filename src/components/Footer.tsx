@@ -22,6 +22,16 @@ export function Footer() {
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
               <span>Deterministic Rule-Based Matching • Source-Audited Metrics</span>
             </div>
+            <div className="pt-3 flex flex-col gap-1.5 text-xs border-t border-slate-800/80 mt-2">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 font-medium">Founder:</span>
+                <span className="text-blue-400 font-semibold tracking-wide">BOLLOJU BHANU TEJA</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 font-medium">Co-Founder:</span>
+                <span className="text-emerald-400 font-semibold tracking-wide">BHAVANA</span>
+              </div>
+            </div>
           </div>
 
           {/* Column: Platform */}
@@ -131,7 +141,9 @@ export function Footer() {
 
         {/* Bottom copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} Vestiq Platforms. All rights reserved. Platform Version 1.0 (MVP).</p>
+          <p>
+            © {new Date().getFullYear()} Vestiq Platforms. Founded by <strong className="text-slate-300 font-medium">BOLLOJU BHANU TEJA</strong> &amp; Co-Founded by <strong className="text-slate-300 font-medium">BHAVANA</strong>. All rights reserved.
+          </p>
           <div className="flex items-center gap-6">
             <Link href="/terms" className="hover:text-slate-400">Terms</Link>
             <Link href="/privacy" className="hover:text-slate-400">Privacy</Link>

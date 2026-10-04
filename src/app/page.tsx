@@ -470,6 +470,65 @@ export default async function HomePage() {
       {/* Interactive Thesis Matcher & Diligence Engine */}
       <ThesisMatcherWidget />
 
+      {/* Founding Leadership Section */}
+      <section className="py-20 bg-slate-50 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-700 bg-blue-100/80 border border-blue-200 px-3.5 py-1 rounded-full inline-block">
+              Founding Leadership
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-950 mt-3.5 tracking-tight">
+              The Visionaries Driving Vestiq
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 mt-2.5">
+              Empowering Indian businesses and investors with structured, legally binding growth capital partnerships.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Founder Card */}
+            <div className="bg-white rounded-2xl p-7 sm:p-8 border border-slate-200/90 shadow-sm hover:shadow-md transition relative overflow-hidden group">
+              <div className="w-2 h-full bg-blue-600 absolute left-0 top-0 group-hover:w-3 transition-all" />
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-blue-500 text-white flex items-center justify-center font-extrabold text-xl shadow-md shrink-0">
+                  BT
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                    Founder
+                  </span>
+                  <h3 className="text-xl font-bold text-slate-950 tracking-tight">BOLLOJU BHANU TEJA</h3>
+                  <p className="text-xs text-slate-500 font-medium">Founder &amp; Platform Architect</p>
+                </div>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Architecting Vestiq&apos;s institutional B2B deal-matching engine, debt &amp; equity workflows, and legally binding digital execution systems under Indian corporate and contract law.
+              </p>
+            </div>
+
+            {/* Co-Founder Card */}
+            <div className="bg-white rounded-2xl p-7 sm:p-8 border border-slate-200/90 shadow-sm hover:shadow-md transition relative overflow-hidden group">
+              <div className="w-2 h-full bg-emerald-600 absolute left-0 top-0 group-hover:w-3 transition-all" />
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-emerald-500 text-white flex items-center justify-center font-extrabold text-xl shadow-md shrink-0">
+                  BH
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full inline-block mb-1">
+                    Co-Founder
+                  </span>
+                  <h3 className="text-xl font-bold text-slate-950 tracking-tight">BHAVANA</h3>
+                  <p className="text-xs text-slate-500 font-medium">Co-Founder &amp; Strategic Operations</p>
+                </div>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Driving founder partnerships, investor relations, multi-stage business verification standards, and strategic platform growth initiatives across Indian enterprise hubs.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Verification & Risk Disclosure Trust Section */}
       <section className="py-16 bg-slate-900 text-white border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
