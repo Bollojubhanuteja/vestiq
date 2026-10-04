@@ -33,20 +33,20 @@ export default function RiskDisclosurePage() {
         </div>
 
         {/* Primary Callout Box */}
-        <div className="p-6 bg-amber-50/80 border-2 border-amber-300/80 rounded-2xl mb-10 text-amber-950 text-sm leading-relaxed">
-          <p className="font-bold text-base mb-2">
-            "Investment opportunities involve risk. Information provided on this platform is for discovery and research purposes and is not a guarantee of returns or financial advice."
+        <div className="p-6 bg-blue-50/80 border-2 border-blue-200 rounded-2xl mb-10 text-slate-900 text-sm leading-relaxed">
+          <p className="font-bold text-base mb-2 text-blue-950">
+            "Business investments and partnerships involve financial opportunities and inherent risks."
           </p>
-          <p className="text-xs text-amber-900 leading-relaxed">
-            Vestiq Platforms Inc. ("Vestiq") operates strictly as an informational software directory, research compilation platform, and opportunity-matching tool. Vestiq is NOT an investment advisor, broker-dealer, funding portal, payment processor, or regulated custodian.
+          <p className="text-xs text-slate-700 leading-relaxed">
+            Vestiq connects verified businesses with prospective capital investors. Both parties enter into structured terms, agreements, and profit/equity distributions in accordance with mutual legal documentation and regulatory requirements.
           </p>
         </div>
 
         <div className="prose prose-slate max-w-none text-slate-700 space-y-8 text-sm leading-relaxed">
           <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-3">1. Non-Custodial Architecture &amp; Zero Transaction Execution</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-3">1. Investment Platform Architecture &amp; Deal Flow</h2>
             <p>
-              Under no circumstances does Vestiq accept, solicit, hold, escrow, clear, or transmit investor funds. Vestiq provides software tools for capital allocators to review company profiles, compare factual metrics, and submit information requests directly to businesses. Any discussions, negotiations, legal documentation, or monetary investments resulting from information discovered on Vestiq take place completely outside of this platform and under the parties' independent counsel.
+              Vestiq provides structured workflows for deal discovery, term negotiation, verification, and partnership agreements. All investment transactions, funding tranches, and returns distributions are governed by verified terms and legally compliant documentation between founders and investors.
             </p>
           </section>
 

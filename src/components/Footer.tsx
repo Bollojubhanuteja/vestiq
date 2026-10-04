@@ -16,7 +16,7 @@ export function Footer() {
               <span className="text-xl font-bold tracking-tight text-white">VESTIQ</span>
             </Link>
             <p className="text-slate-400 leading-relaxed pr-6">
-              Vestiq is an investment opportunity discovery and research platform connecting capital allocators with emerging businesses. We organize research, streamline due diligence inquiries, and calculate transparent preference compatibility scores.
+              Vestiq is a premium B2B business investment and partnership platform connecting verified businesses with potential investors. Discover opportunities, negotiate structured terms, and build strategic business partnerships.
             </p>
             <div className="flex items-center gap-2 text-xs text-slate-500 pt-2">
               <ShieldCheck className="w-4 h-4 text-emerald-400" />
@@ -111,19 +111,19 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Detailed Regulatory / Legal Position Notice */}
+        {/* Detailed Regulatory / Investment Position Notice */}
         <div className="py-8 border-b border-slate-800 text-xs text-slate-500 space-y-3">
           <div className="flex items-start gap-2.5 bg-slate-950 p-4 rounded-xl border border-slate-800/80">
-            <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <ShieldCheck className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
             <div className="space-y-1.5 leading-relaxed">
               <p className="font-semibold text-slate-300">
-                Important Regulatory &amp; Non-Intermediary Notice:
+                Important Investment &amp; Regulatory Notice:
               </p>
               <p>
-                Vestiq is strictly an informational discovery, research, and opportunity-management software platform. Vestiq does NOT handle customer capital, accept investor deposits, execute or clear investment transactions, or hold custody of funds. Vestiq is NOT a registered broker-dealer, investment advisor, crowdfunding portal, or regulated financial intermediary.
+                Vestiq connects verified businesses seeking capital with qualified investors and strategic partners across structured fixed-return and equity models. All investment terms, distributions, and agreements are executed in accordance with applicable statutory standards and mutual contracts between participating parties.
               </p>
               <p>
-                All company information and financial metrics displayed on Vestiq are provided by the respective business submitters and reviewed for basic verification criteria. Past performance and self-reported metrics are not indicators of future profitability. Investment in early-stage, growth, or private enterprises involves significant risk, including complete loss of capital, illiquidity, and lack of secondary market transferability. Investors must conduct independent commercial, financial, and legal due diligence before entering into any private investment agreements outside the platform.
+                All company information and financial metrics displayed on Vestiq are provided by respective business submitters and verified via platform due diligence. Business investments carry commercial risks, and financial returns vary based on operating performance. Investors and business owners are advised to conduct independent review of agreements and risk disclosures prior to execution.
               </p>
             </div>
           </div>

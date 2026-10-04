@@ -30,9 +30,9 @@ export default function AboutPage() {
             Historically, finding early-stage and growth investment opportunities has been an opaque, word-of-mouth process. Capital allocators are bombarded with unstandardized pitch decks, exaggerated claims of profitability, and artificial urgency. Meanwhile, credible founders waste hundreds of hours chasing investors whose ticket sizes and sector mandates don’t align with their round.
           </p>
 
-          <h2 className="text-xl font-bold text-slate-900">Our V1 Philosophy: Information Over Transactions</h2>
+          <h2 className="text-xl font-bold text-slate-900">Our Platform Philosophy: Transparency &amp; Structured Diligence</h2>
           <p>
-            Vestiq was engineered from day one with a strict non-custodial architecture. We do NOT handle client funds, process investment payments, execute trades, or operate as a broker-dealer. By keeping the platform focused exclusively on information, standardized verification, and transparent preference matching, we prioritize integrity over transactional hype.
+            Vestiq bridges the gap between businesses raising capital and investors seeking verified opportunities. By providing standardized metrics, structured fixed-return and equity models, and formal diligence workflows, we make business partnerships efficient, legally compliant, and transparent.
           </p>
 
           <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 my-8">

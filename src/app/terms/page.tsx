@@ -29,9 +29,9 @@ export default function TermsPage() {
             By accessing or using the Vestiq platform ("Platform", "we", "us"), you agree to be bound by these Terms of Service. If you do not agree, you must immediately discontinue use of the platform.
           </p>
 
-          <h2 className="text-lg font-bold text-slate-900">2. Description of Service &amp; Non-Intermediary Status</h2>
+          <h2 className="text-lg font-bold text-slate-900">2. Description of Service &amp; Investment Platform</h2>
           <p>
-            Vestiq provides an online software platform for discovering, organizing, comparing, and managing research on private businesses and investment opportunities. Vestiq is NOT a broker-dealer, funding portal, registered investment adviser, payment processor, or depository institution. V1 does not handle customer money, process investment payments, or execute investments.
+            Vestiq provides a B2B business investment and partnership platform connecting verified businesses seeking capital with investors and strategic growth partners. Investment models, equity participation, fixed returns, and agreements are structured through verified contracts and statutory compliance between participating parties.
           </p>
 
           <h2 className="text-lg font-bold text-slate-900">3. User Accounts and Role-Based Responsibilities</h2>

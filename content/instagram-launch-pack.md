@@ -141,10 +141,10 @@ To immediately signal institutional credibility and command high-ticket trust:
 * **Slide Copy:**
   * **Header:** We Didn't Build a Crowdfunding App. We Built a Diligence Engine.
   * **Body:**
-    * Vestiq does not handle customer money.
+    * Vestiq structures verified investment & partnership deals.
     * Vestiq does not hype speculative returns.
-    * Vestiq does not replace your due diligence.
-  * **Key Statement:** "We built the software infrastructure for investors to discover, benchmark, and research ventures with total mathematical transparency."
+    * Vestiq provides deep transparency into risk and metrics.
+  * **Key Statement:** "We built the platform infrastructure for investors and founders to discover, benchmark, and execute business partnerships with total transparency."
 
 ---
 

@@ -32,17 +32,17 @@ export default function HowItWorksPage() {
             How Vestiq Works
           </h1>
           <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed">
-            A transparent, non-custodial platform connecting capital allocators and emerging businesses for organized research, discovery, and direct diligence communication.
+            A transparent B2B platform connecting business owners seeking capital with qualified investors across fixed-return and equity funding models.
           </p>
         </div>
 
-        {/* Clear Legal Status Notice */}
+        {/* Platform Overview Notice */}
         <div className="mb-16 p-5 bg-blue-50/70 border border-blue-200/80 rounded-2xl flex items-start gap-3 text-xs text-blue-900 leading-relaxed">
           <ShieldCheck className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
           <div>
-            <p className="font-semibold text-blue-950 mb-1">Our Non-Intermediary Operating Model:</p>
+            <p className="font-semibold text-blue-950 mb-1">End-to-End Investment &amp; Partnership Workflow:</p>
             <p>
-              Vestiq does not accept customer deposits, execute financial transactions, broker deals, or offer personalized financial advice. Our platform standardizes business disclosures and computes preference compatibility scores so you can conduct independent research efficiently.
+              Vestiq connects verified businesses with prospective capital investors. From listing review and indicative term negotiation to due diligence and formal partnership agreements, our platform standardizes disclosures and structures every step cleanly.
             </p>
           </div>
         </div>

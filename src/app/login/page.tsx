@@ -182,9 +182,9 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Bottom Disclaimer */}
+        {/* Bottom Tagline */}
         <p className="mt-6 text-[11px] text-slate-400 text-center leading-relaxed">
-          Vestiq is an information discovery and research platform. We do not handle funds or execute investments.
+          Vestiq • Premium B2B Business Investment &amp; Partnership Platform
         </p>
       </div>
     </div>

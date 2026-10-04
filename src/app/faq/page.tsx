@@ -11,8 +11,8 @@ export const metadata = {
 export default function FaqPage() {
   const faqs = [
     {
-      q: 'Does Vestiq handle investor money or execute transactions?',
-      a: 'No. Vestiq V1 is strictly an informational discovery, research, and opportunity-management software platform. We do NOT accept deposits, process investment transactions, hold funds in custody, or act as an escrow agent or broker-dealer.',
+      q: 'How does Vestiq facilitate investment and partnership agreements?',
+      a: 'Vestiq provides a structured workflow where investors explore verified business listings, submit indicative interest, review terms, and negotiate agreements. Funding, profit-sharing distributions, and equity transfers are coordinated in accordance with verified contracts and regulatory requirements.',
     },
     {
       q: 'What exactly is the "Preference Match" score?',

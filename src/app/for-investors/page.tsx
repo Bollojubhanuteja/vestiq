@@ -76,22 +76,22 @@ export default function ForInvestorsPage() {
           </div>
         </div>
 
-        {/* Regulatory Clarity Callout */}
+        {/* Deal Flow & Opportunity Callout */}
         <div className="p-8 rounded-3xl bg-slate-900 text-white flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400 block">
-              Clear Boundaries
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-400 block">
+              Direct Opportunity Discovery
             </span>
-            <h3 className="text-xl font-bold">Non-Custodial Research Platform</h3>
+            <h3 className="text-xl font-bold">Structured Investment &amp; Partnership Workflow</h3>
             <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-              Vestiq does not accept deposits, hold funds, or execute transactions. We provide the information infrastructure so you can perform independent diligence.
+              Express interest directly on verified business listings, review repayment schedules or equity participation, and execute legal agreements seamlessly.
             </p>
           </div>
           <Link
-            href="/risk-disclosure"
-            className="px-5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 text-xs font-semibold text-white whitespace-nowrap transition"
+            href="/explore"
+            className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-xs font-semibold text-white whitespace-nowrap transition"
           >
-            Review Risk Notice
+            Explore Opportunities
           </Link>
         </div>
       </div>

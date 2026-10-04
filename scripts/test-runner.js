@@ -333,9 +333,19 @@ async function runTests() {
     // TEST 7: Two B2B Investment Models Verification
     // ----------------------------------------------------
     console.log('\nTEST SUITE 7: Two Structured Investment Models (Fixed Return vs Equity)');
+    const fixedFounder = await db.user.create({
+      data: {
+        email: `test-fixed-${Date.now()}@test.vestiq.in`,
+        passwordHash: pwdHash,
+        role: 'BUSINESS',
+        name: 'Anil Test',
+      },
+    });
+    cleanupUserIds.push(fixedFounder.id);
+
     const testFixedDeal = await db.businessProfile.create({
       data: {
-        userId: bizUser1.id,
+        userId: fixedFounder.id,
         companyName: 'Test Fixed Energy Private Limited',
         founderName: 'Anil Test',
         email: 'anil@testfixed.demo',
@@ -379,9 +389,19 @@ async function runTests() {
       `Option 1 specifies collateral / security details: "${testFixedDeal.collateralDetails.slice(0, 45)}..."`
     );
 
+    const equityFounder = await db.user.create({
+      data: {
+        email: `test-equity-${Date.now()}@test.vestiq.in`,
+        passwordHash: pwdHash,
+        role: 'BUSINESS',
+        name: 'Pooja Test',
+      },
+    });
+    cleanupUserIds.push(equityFounder.id);
+
     const testEquityDeal = await db.businessProfile.create({
       data: {
-        userId: bizUser2.id,
+        userId: equityFounder.id,
         companyName: 'Test Equity Diagnostics Private Limited',
         founderName: 'Pooja Test',
         email: 'pooja@testequity.demo',
