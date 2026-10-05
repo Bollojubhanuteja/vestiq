@@ -239,6 +239,20 @@ model InvestmentAgreement {
   businessDesignation     String?
   businessSignatureHash   String?
   executionCertificateId  String?
+  // Aadhaar / DigiLocker eSign
+  investorAadhaarLast4    String?
+  businessAadhaarLast4    String?
+  investorEsignMethod     String?             // "AADHAAR_OTP", "PAN_DIGITAL_DECLARATION"
+  businessEsignMethod     String?             // "AADHAAR_OTP", "PAN_DIGITAL_DECLARATION"
+  // Escrow Banking Integration (Razorpay / Cashfree Escrow Architecture)
+  escrowStatus            String              @default("NONE") // "NONE", "PENDING_DEPOSIT", "HELD_IN_ESCROW", "RELEASED", "REFUNDED"
+  escrowAmount            Float?
+  escrowPaymentMethod     String?             // "UPI", "NETBANKING", "NEFT_RTGS"
+  escrowTransactionId     String?
+  escrowUtrNumber         String?
+  escrowVirtualAccount    String?
+  escrowFundedAt          DateTime?
+  escrowReleasedAt        DateTime?
   createdAt               DateTime            @default(now())
   updatedAt               DateTime            @updatedAt
 }

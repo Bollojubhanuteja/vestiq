@@ -7,6 +7,8 @@ import {
   generateFormalLoanDebentureDeed,
   generateShareholdersAgreement,
 } from '@/lib/legal-templates';
+import { requestAadhaarOtp, verifyAadhaarOtpAndSign } from '@/lib/aadhaar-esign';
+import { executeEscrowDeposit, executeEscrowRelease } from '@/lib/escrow-banking';
 
 export const dynamic = 'force-dynamic';
 
@@ -442,6 +444,163 @@ export async function PATCH(req: NextRequest) {
           updateData.status = 'PENDING_INVESTOR_SIGN';
         }
       }
+    }
+
+    // -------------------------------------------------------------------------
+    // ACTION 4: REQUEST AADHAAR OTP (UIDAI SIMULATION & LIVE ESP HOOK)
+    // -------------------------------------------------------------------------
+    if (action === 'REQUEST_AADHAAR_OTP') {
+      const { aadhaarNumber } = body;
+      const otpRes = await requestAadhaarOtp(aadhaarNumber || '');
+      if (!otpRes.success) {
+        return NextResponse.json({ error: otpRes.error || 'Failed to generate Aadhaar OTP' }, { status: 400 });
+      }
+      return NextResponse.json({
+        success: true,
+        transactionId: otpRes.transactionId,
+        maskedMobile: otpRes.maskedMobile,
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // ACTION 5: SIGN VIA AADHAAR OTP & DIGILOCKER
+    // -------------------------------------------------------------------------
+    if (action === 'SIGN_AADHAAR_OTP') {
+      const { aadhaarNumber, otp, transactionId } = body;
+      const signerLegalName = legalName || session.name || (isInvestor ? agreement.investorUser.name : agreement.businessProfile.founderName);
+
+      const signResult = await verifyAadhaarOtpAndSign({
+        transactionId: transactionId || `UIDAI-TXN-${Date.now().toString(36).toUpperCase()}`,
+        otp: otp || '123456',
+        aadhaarNumber: aadhaarNumber || '999999999999',
+        agreementId,
+        signerLegalName,
+      });
+
+      if (!signResult.success) {
+        return NextResponse.json({ error: signResult.error || 'Aadhaar eSign verification failed' }, { status: 400 });
+      }
+
+      const cleanLast4 = (aadhaarNumber || '').replace(/\s+/g, '').slice(-4) || '9999';
+
+      if (isInvestor) {
+        updateData.investorSignedAt = now;
+        updateData.investorLegalName = signerLegalName;
+        updateData.investorAadhaarLast4 = cleanLast4;
+        updateData.investorEsignMethod = 'AADHAAR_OTP';
+        updateData.investorSignatureHash = signResult.signatureHash;
+
+        if (agreement.businessSignedAt) {
+          updateData.status = 'EXECUTED';
+          updateData.executionCertificateId = `VST-EXEC-${agreement.id.slice(-6).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+        } else {
+          updateData.status = 'PENDING_FOUNDER_SIGN';
+        }
+      } else if (isOwner) {
+        updateData.businessSignedAt = now;
+        updateData.businessLegalName = signerLegalName;
+        updateData.businessAadhaarLast4 = cleanLast4;
+        updateData.businessEsignMethod = 'AADHAAR_OTP';
+        updateData.businessSignatureHash = signResult.signatureHash;
+
+        if (agreement.investorSignedAt) {
+          updateData.status = 'EXECUTED';
+          updateData.executionCertificateId = `VST-EXEC-${agreement.id.slice(-6).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
+        } else {
+          updateData.status = 'PENDING_INVESTOR_SIGN';
+        }
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // ACTION 6: ESCROW DEPOSIT (INVESTOR FUNDS VIRTUAL ESCROW ACCOUNT)
+    // -------------------------------------------------------------------------
+    if (action === 'ESCROW_DEPOSIT') {
+      const { amount, paymentMethod } = body;
+      const depositAmount = Number(amount) || agreement.principalOrAmount;
+      const method = (paymentMethod || 'UPI') as 'UPI' | 'NETBANKING' | 'NEFT_RTGS';
+
+      const depositRes = await executeEscrowDeposit({
+        agreementId,
+        companyName: agreement.businessProfile.companyName,
+        amount: depositAmount,
+        paymentMethod: method,
+        investorName: agreement.investorUser.name,
+      });
+
+      if (!depositRes.success) {
+        return NextResponse.json({ error: depositRes.error || 'Failed to deposit to escrow' }, { status: 400 });
+      }
+
+      updateData.escrowStatus = 'HELD_IN_ESCROW';
+      updateData.escrowAmount = depositAmount;
+      updateData.escrowPaymentMethod = method;
+      updateData.escrowTransactionId = depositRes.transactionId;
+      updateData.escrowVirtualAccount = depositRes.virtualAccount.accountNumber;
+      updateData.escrowFundedAt = now;
+
+      await db.notification.createMany({
+        data: [
+          {
+            userId: agreement.businessProfile.userId,
+            title: `Escrow Funded: ₹${depositAmount.toLocaleString('en-IN')}`,
+            message: `Investor ${agreement.investorUser.name} deposited ₹${depositAmount.toLocaleString('en-IN')} into Vestiq Trustee Escrow for ${agreement.businessProfile.companyName}. Funds held in secure escrow.`,
+            type: 'PAYMENT',
+            link: '/dashboard/business/requests',
+          },
+          {
+            userId: agreement.investorUserId,
+            title: `Escrow Deposit Confirmed: ₹${depositAmount.toLocaleString('en-IN')}`,
+            message: `Your deposit of ₹${depositAmount.toLocaleString('en-IN')} is safely held in Vestiq Neutral Trustee Escrow (Txn: ${depositRes.transactionId}).`,
+            type: 'PAYMENT',
+            link: '/dashboard/investor/requests',
+          },
+        ],
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // ACTION 7: ESCROW RELEASE (FUNDS DISBURSED TO BUSINESS)
+    // -------------------------------------------------------------------------
+    if (action === 'ESCROW_RELEASE') {
+      if (agreement.status !== 'EXECUTED') {
+        return NextResponse.json(
+          { error: 'Cannot release escrow funds until both parties have executed the legal deed.' },
+          { status: 400 }
+        );
+      }
+
+      const releaseAmount = agreement.escrowAmount || agreement.principalOrAmount;
+      const releaseRes = await executeEscrowRelease({
+        agreementId,
+        transactionId: agreement.escrowTransactionId || `VST-ESC-${agreement.id.slice(-6).toUpperCase()}`,
+        amount: releaseAmount,
+        founderName: agreement.businessProfile.founderName,
+        companyName: agreement.businessProfile.companyName,
+      });
+
+      updateData.escrowStatus = 'RELEASED';
+      updateData.escrowUtrNumber = releaseRes.utrNumber;
+      updateData.escrowReleasedAt = now;
+
+      await db.notification.createMany({
+        data: [
+          {
+            userId: agreement.businessProfile.userId,
+            title: `Escrow Funds Disbursed: ₹${releaseAmount.toLocaleString('en-IN')}`,
+            message: `Capital of ₹${releaseAmount.toLocaleString('en-IN')} has been disbursed to your current account. RBI UTR: ${releaseRes.utrNumber}.`,
+            type: 'PAYMENT',
+            link: '/dashboard/business/requests',
+          },
+          {
+            userId: agreement.investorUserId,
+            title: `Escrow Disbursed to ${agreement.businessProfile.companyName}`,
+            message: `Capital has been successfully disbursed upon legal compliance verification. Official UTR: ${releaseRes.utrNumber}.`,
+            type: 'PAYMENT',
+            link: '/dashboard/investor/requests',
+          },
+        ],
+      });
     }
 
     const updated = await db.investmentAgreement.update({

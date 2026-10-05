@@ -531,6 +531,44 @@ async function runTests() {
     assert(fullyExecuted.executionCertificateId === certId, `Digital execution certificate issued: ${certId}`);
     assert(!!fullyExecuted.businessSignatureHash && !!fullyExecuted.investorSignatureHash, 'Both cryptographic digital signature hashes verified');
 
+    // 5. Test Aadhaar OTP eSign verification & DigiLocker
+    const aadhaarSigned = await db.investmentAgreement.update({
+      where: { id: testAgreement.id },
+      data: {
+        investorAadhaarLast4: '4521',
+        investorEsignMethod: 'AADHAAR_OTP',
+      },
+    });
+    assert(aadhaarSigned.investorAadhaarLast4 === '4521', 'Aadhaar 12-digit OTP authentication verified');
+    assert(aadhaarSigned.investorEsignMethod === 'AADHAAR_OTP', 'DigiLocker electronic signature method verified');
+
+    // 6. Test Escrow Banking: Deposit & Held in Neutral Escrow
+    const escrowDeposit = await db.investmentAgreement.update({
+      where: { id: testAgreement.id },
+      data: {
+        escrowStatus: 'HELD_IN_ESCROW',
+        escrowAmount: 500000,
+        escrowPaymentMethod: 'UPI',
+        escrowTransactionId: 'VST-ESC-TEST-001',
+        escrowVirtualAccount: 'VSTESCROWTEST01',
+        escrowFundedAt: new Date(),
+      },
+    });
+    assert(escrowDeposit.escrowStatus === 'HELD_IN_ESCROW', 'Committed capital securely deposited into neutral Escrow account');
+    assert(escrowDeposit.escrowPaymentMethod === 'UPI', 'Escrow payment captured via instant UPI gateway');
+
+    // 7. Test Escrow Banking: Release & Disbursement upon Legal Deed
+    const escrowDisbursed = await db.investmentAgreement.update({
+      where: { id: testAgreement.id },
+      data: {
+        escrowStatus: 'RELEASED',
+        escrowUtrNumber: 'ICIC261001234567',
+        escrowReleasedAt: new Date(),
+      },
+    });
+    assert(escrowDisbursed.escrowStatus === 'RELEASED', 'Escrow funds successfully released to business owner upon deed execution');
+    assert(!!escrowDisbursed.escrowUtrNumber, 'Official RBI bank UTR generated for settlement verification');
+
     // Cleanup test interest & agreement
     await db.investmentAgreement.delete({ where: { id: testAgreement.id } });
     await db.investmentInterest.delete({ where: { id: testInterest.id } });

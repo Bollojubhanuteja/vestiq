@@ -21,9 +21,11 @@ import {
   Scroll,
   PenTool,
   Printer,
-  Award
+  Award,
+  Lock
 } from 'lucide-react';
 import { DeedExecutionModal } from '@/components/DeedExecutionModal';
+import { EscrowPaymentModal } from '@/components/EscrowPaymentModal';
 
 export default function InvestorRequestsPage() {
   const [activeTab, setActiveTab] = useState<'INTERESTS' | 'INQUIRIES'>('INTERESTS');
@@ -45,6 +47,10 @@ export default function InvestorRequestsPage() {
   // Formal Deed Execution modal state
   const [selectedDeed, setSelectedDeed] = useState<any | null>(null);
   const [deedModalOpen, setDeedModalOpen] = useState(false);
+
+  // Escrow Settlement modal state
+  const [selectedEscrowAgreement, setSelectedEscrowAgreement] = useState<any | null>(null);
+  const [escrowModalOpen, setEscrowModalOpen] = useState(false);
 
   const fetchInterests = async () => {
     try {
@@ -353,7 +359,29 @@ export default function InvestorRequestsPage() {
                               <span>Founder E-Sign: {agreement.businessSignedAt ? '✓ Signed' : 'Pending'}</span>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {agreement.escrowStatus === 'HELD_IN_ESCROW' && (
+                                <span className="font-bold text-[10px] px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+                                  🔒 Escrow Funded
+                                </span>
+                              )}
+                              {agreement.escrowStatus === 'RELEASED' && (
+                                <span className="font-bold text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300">
+                                  ✓ Escrow Disbursed
+                                </span>
+                              )}
+
+                              <button
+                                onClick={() => {
+                                  setSelectedEscrowAgreement(agreement);
+                                  setEscrowModalOpen(true);
+                                }}
+                                className="px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5"
+                              >
+                                <Lock className="w-3.5 h-3.5" />
+                                Escrow Settlement
+                              </button>
+
                               <button
                                 onClick={() => {
                                   setSelectedDeed(agreement);
@@ -549,6 +577,30 @@ export default function InvestorRequestsPage() {
                 .then((r) => r.json())
                 .then((d) => {
                   if (d.agreements?.[0]) setSelectedDeed(d.agreements[0]);
+                });
+            }
+          }}
+        />
+      )}
+
+      {/* Escrow Banking Modal */}
+      {selectedEscrowAgreement && (
+        <EscrowPaymentModal
+          isOpen={escrowModalOpen}
+          onClose={() => {
+            setEscrowModalOpen(false);
+            setSelectedEscrowAgreement(null);
+          }}
+          agreement={selectedEscrowAgreement}
+          currentUserId=""
+          currentUserRole="INVESTOR"
+          onAgreementUpdated={() => {
+            fetchInterests();
+            if (selectedEscrowAgreement?.id) {
+              fetch(`/api/agreements?id=${selectedEscrowAgreement.id}`)
+                .then((r) => r.json())
+                .then((d) => {
+                  if (d.agreements?.[0]) setSelectedEscrowAgreement(d.agreements[0]);
                 });
             }
           }}
