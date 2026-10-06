@@ -11,7 +11,7 @@ export async function middleware(req: NextRequest) {
   // Protected paths
   const isInvestorRoute = pathname.startsWith('/dashboard/investor') || pathname.startsWith('/onboarding/investor');
   const isBusinessRoute = pathname.startsWith('/dashboard/business');
-  const isAdminRoute = pathname.startsWith('/admin');
+  const isAdminRoute = pathname.startsWith('/admin') && pathname !== '/admin/login';
 
   if (!isInvestorRoute && !isBusinessRoute && !isAdminRoute) {
     return NextResponse.next();

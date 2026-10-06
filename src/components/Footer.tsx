@@ -27,10 +27,6 @@ export function Footer() {
                 <span className="text-slate-400 font-medium">Founder:</span>
                 <span className="text-blue-400 font-semibold tracking-wide">BOLLOJU BHANU TEJA</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-slate-400 font-medium">Co-Founder:</span>
-                <span className="text-emerald-400 font-semibold tracking-wide">BHAVANA</span>
-              </div>
             </div>
           </div>
 
@@ -142,12 +138,13 @@ export function Footer() {
         {/* Bottom copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>
-            © {new Date().getFullYear()} Vestiq Platforms. Founded by <strong className="text-slate-300 font-medium">BOLLOJU BHANU TEJA</strong> &amp; Co-Founded by <strong className="text-slate-300 font-medium">BHAVANA</strong>. All rights reserved.
+            © {new Date().getFullYear()} Vestiq Platforms. Founded by <strong className="text-slate-300 font-medium">BOLLOJU BHANU TEJA</strong>. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link href="/terms" className="hover:text-slate-400">Terms</Link>
             <Link href="/privacy" className="hover:text-slate-400">Privacy</Link>
             <Link href="/risk-disclosure" className="hover:text-slate-400">Disclosures</Link>
+            <Link href="/admin/login" className="hover:text-amber-400 text-slate-500">Executive Portal</Link>
           </div>
         </div>
       </div>

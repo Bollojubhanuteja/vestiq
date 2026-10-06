@@ -1,30 +1,44 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ShieldCheck, Lock, Mail, AlertCircle, ArrowRight, UserCheck, Briefcase, Shield } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  Lock,
+  Mail,
+  AlertCircle,
+  ArrowRight,
+  UserCheck,
+  Briefcase,
+  Shield,
+  CheckCircle2,
+  TrendingUp,
+  Building2
+} from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialRole = (searchParams.get('role')?.toUpperCase() === 'BUSINESS' ? 'BUSINESS' : 'INVESTOR') as
+    | 'INVESTOR'
+    | 'BUSINESS';
+
+  const [selectedRole, setSelectedRole] = useState<'INVESTOR' | 'BUSINESS'>(initialRole);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (e?: React.FormEvent, customEmail?: string, customPassword?: string) => {
-    if (e) e.preventDefault();
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     setError(null);
-
-    const emailToSend = customEmail || email;
-    const passwordToSend = customPassword || password;
 
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: emailToSend, password: passwordToSend }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
 
       const data = await res.json();
@@ -44,7 +58,7 @@ export default function LoginPage() {
         }
         router.refresh();
       } else {
-        setError(data.error || 'Authentication failed. Please verify credentials.');
+        setError(data.error || 'Authentication failed. Please verify your email and password.');
       }
     } catch {
       setError('Network connection error. Please try again.');
@@ -53,101 +67,92 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoLogin = (demoRole: 'INVESTOR' | 'BUSINESS' | 'FOUNDER' | 'COFOUNDER') => {
-    if (demoRole === 'INVESTOR') {
-      setEmail('investor@vestiq.com');
-      setPassword('Password123!');
-      handleLogin(undefined, 'investor@vestiq.com', 'Password123!');
-    } else if (demoRole === 'BUSINESS') {
-      setEmail('founder1@agripulse.demo');
-      setPassword('Password123!');
-      handleLogin(undefined, 'founder1@agripulse.demo', 'Password123!');
-    } else if (demoRole === 'FOUNDER') {
-      setEmail('vestiq21@gmail.com');
-      setPassword('Vestiq@Launch2026!');
-      handleLogin(undefined, 'vestiq21@gmail.com', 'Vestiq@Launch2026!');
-    } else if (demoRole === 'COFOUNDER') {
-      setEmail('bhavana@vestiq.com');
-      setPassword('Vestiq@Bhavana2026!');
-      handleLogin(undefined, 'bhavana@vestiq.com', 'Vestiq@Bhavana2026!');
-    }
-  };
-
   return (
     <div className="py-16 md:py-24 bg-slate-50 min-h-screen flex items-center justify-center px-4">
       <div className="max-w-md w-full">
         {/* Card Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-sm">
+          <Link href="/" className="inline-flex items-center gap-2 mb-4 group">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 group-hover:bg-blue-700 text-white font-bold text-xl shadow-sm flex items-center justify-center transition">
               V
             </div>
             <span className="text-2xl font-bold tracking-tight text-slate-900">VESTIQ</span>
           </Link>
           <h1 className="text-2xl font-extrabold text-slate-950">Welcome Back</h1>
           <p className="mt-1 text-xs text-slate-500">
-            Sign in to access your investment research workspace
+            Sign in to access your investment discovery and deal workspace
           </p>
         </div>
 
-        {/* Executive Fast Sign-in Portals */}
-        <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm mb-6 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600">
-              Executive Leadership Desks
-            </span>
-            <span className="text-[10px] text-blue-600 font-semibold">1-Click Access</span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 text-xs">
-            {/* Founder Admin Button */}
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('FOUNDER')}
-              className="p-3 rounded-xl border border-blue-200 bg-blue-50/70 hover:bg-blue-100/90 text-blue-900 font-medium transition text-left relative overflow-hidden group shadow-sm"
+        {/* Role Selection Tabs */}
+        <div className="grid grid-cols-2 gap-2.5 mb-6">
+          {/* Investor Tab */}
+          <button
+            type="button"
+            onClick={() => setSelectedRole('INVESTOR')}
+            className={`p-3.5 rounded-2xl border text-left transition flex items-start gap-2.5 ${
+              selectedRole === 'INVESTOR'
+                ? 'bg-blue-50/70 border-blue-500 shadow-sm ring-1 ring-blue-500 text-blue-950'
+                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
+            }`}
+          >
+            <div
+              className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                selectedRole === 'INVESTOR'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-100 text-slate-500'
+              }`}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-5 h-5 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">
-                  BT
-                </div>
-                <span className="text-[10px] font-bold uppercase text-blue-700 tracking-wider">
-                  Founder Admin
-                </span>
+              <UserCheck className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="font-bold text-xs text-slate-900 flex items-center gap-1">
+                Investor Sign In
+                {selectedRole === 'INVESTOR' && (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 inline" />
+                )}
               </div>
-              <div className="font-bold text-slate-900 text-xs truncate">
-                BOLLOJU BHANU TEJA
-              </div>
-              <p className="text-[10px] text-blue-700/80 mt-0.5 truncate">
-                Core Tech &amp; Legal Deeds
+              <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">
+                Deals, thesis &amp; agreements
               </p>
-            </button>
+            </div>
+          </button>
 
-            {/* Co-Founder Admin Button */}
-            <button
-              type="button"
-              onClick={() => handleDemoLogin('COFOUNDER')}
-              className="p-3 rounded-xl border border-emerald-200 bg-emerald-50/70 hover:bg-emerald-100/90 text-emerald-900 font-medium transition text-left relative overflow-hidden group shadow-sm"
+          {/* Business Tab */}
+          <button
+            type="button"
+            onClick={() => setSelectedRole('BUSINESS')}
+            className={`p-3.5 rounded-2xl border text-left transition flex items-start gap-2.5 ${
+              selectedRole === 'BUSINESS'
+                ? 'bg-emerald-50/70 border-emerald-500 shadow-sm ring-1 ring-emerald-500 text-emerald-950'
+                : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
+            }`}
+          >
+            <div
+              className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+                selectedRole === 'BUSINESS'
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-slate-100 text-slate-500'
+              }`}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <div className="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px]">
-                  BH
-                </div>
-                <span className="text-[10px] font-bold uppercase text-emerald-700 tracking-wider">
-                  Co-Founder Admin
-                </span>
+              <Briefcase className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="font-bold text-xs text-slate-900 flex items-center gap-1">
+                Business Sign In
+                {selectedRole === 'BUSINESS' && (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 inline" />
+                )}
               </div>
-              <div className="font-bold text-slate-900 text-xs truncate">
-                BHAVANA
-              </div>
-              <p className="text-[10px] text-emerald-700/80 mt-0.5 truncate">
-                Operations &amp; Diligence
+              <p className="text-[10px] text-slate-500 mt-0.5 leading-snug">
+                Fundraising &amp; campaign
               </p>
-            </button>
-          </div>
+            </div>
+          </button>
         </div>
 
         {/* Login Form */}
-        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+        <div className="bg-white p-7 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs mb-5 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
@@ -155,10 +160,10 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={(e) => handleLogin(e)} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-slate-700 mb-1">
-                Email Address
+                {selectedRole === 'INVESTOR' ? 'Investor Email Address' : 'Business Account Email'}
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -167,8 +172,12 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@vestiq.com"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500"
+                  placeholder={
+                    selectedRole === 'INVESTOR'
+                      ? 'investor@example.com'
+                      : 'founder@yourcompany.com'
+                  }
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 />
               </div>
             </div>
@@ -185,7 +194,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 />
               </div>
             </div>
@@ -193,25 +202,77 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm transition mt-2 flex items-center justify-center gap-1.5"
+              className={`w-full py-3 text-white rounded-xl text-xs font-semibold shadow-sm transition mt-2 flex items-center justify-center gap-1.5 ${
+                selectedRole === 'INVESTOR'
+                  ? 'bg-blue-600 hover:bg-blue-700'
+                  : 'bg-emerald-600 hover:bg-emerald-700'
+              }`}
             >
-              {loading ? 'Authenticating...' : 'Sign In'}
+              {loading ? (
+                'Authenticating...'
+              ) : selectedRole === 'INVESTOR' ? (
+                <>Sign In to Investor Dashboard &rarr;</>
+              ) : (
+                <>Sign In to Business Dashboard &rarr;</>
+              )}
             </button>
           </form>
 
+          {/* Register Link */}
           <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-500">
-            Don't have an account yet?{' '}
-            <Link href="/register" className="text-blue-600 font-semibold hover:underline">
-              Create an account &rarr;
-            </Link>
+            {selectedRole === 'INVESTOR' ? (
+              <>
+                New investor on Vestiq?{' '}
+                <Link
+                  href="/register?role=investor"
+                  className="text-blue-600 font-semibold hover:underline"
+                >
+                  Create Investor Account &rarr;
+                </Link>
+              </>
+            ) : (
+              <>
+                Raising capital for your business?{' '}
+                <Link
+                  href="/register?role=business"
+                  className="text-emerald-600 font-semibold hover:underline"
+                >
+                  Register Your Startup &rarr;
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
+        {/* Platform Administrator Discreet Link */}
+        <div className="mt-6 text-center">
+          <Link
+            href="/admin/login"
+            className="inline-flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-slate-700 transition"
+          >
+            <Shield className="w-3.5 h-3.5 text-amber-500" /> Platform Administrator? Executive Portal &rarr;
+          </Link>
+        </div>
+
         {/* Bottom Tagline */}
-        <p className="mt-6 text-[11px] text-slate-400 text-center leading-relaxed">
-          Vestiq • Premium B2B Business Investment &amp; Partnership Platform
+        <p className="mt-4 text-[11px] text-slate-400 text-center leading-relaxed">
+          Vestiq • Standardized B2B Investment &amp; Partnership Discovery Platform
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-24 text-center">
+          <p className="text-xs text-slate-500">Loading sign in portal...</p>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -257,8 +257,11 @@ function RegisterForm() {
 
           <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-500">
             Already registered on Vestiq?{' '}
-            <Link href="/login" className="text-blue-600 font-semibold hover:underline">
-              Sign In &rarr;
+            <Link
+              href={`/login?role=${role.toLowerCase()}`}
+              className="text-blue-600 font-semibold hover:underline"
+            >
+              Sign In as {role === 'INVESTOR' ? 'Investor' : 'Business'} &rarr;
             </Link>
           </div>
         </div>
