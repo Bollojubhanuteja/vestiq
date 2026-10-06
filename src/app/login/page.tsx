@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Lock,
   Mail,
@@ -12,41 +11,18 @@ import {
   Briefcase,
   Shield,
   CheckCircle2,
-  TrendingUp,
-  Building2,
-  Sparkles
+  Sparkles,
+  User,
+  Building2
 } from 'lucide-react';
 
-function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const getInitialRole = (): 'INVESTOR' | 'BUSINESS' | 'ADMIN' => {
-    const r = searchParams.get('role')?.toUpperCase();
-    const portal = searchParams.get('portal')?.toUpperCase();
-    if (r === 'ADMIN' || portal === 'ADMIN') return 'ADMIN';
-    if (r === 'BUSINESS') return 'BUSINESS';
-    return 'INVESTOR';
-  };
-
-  const [selectedRole, setSelectedRole] = useState<'INVESTOR' | 'BUSINESS' | 'ADMIN'>(getInitialRole());
+export default function LoginPage() {
+  const [selectedRole, setSelectedRole] = useState<'INVESTOR' | 'BUSINESS' | 'ADMIN'>('INVESTOR');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const r = searchParams.get('role')?.toUpperCase();
-    const portal = searchParams.get('portal')?.toUpperCase();
-    if (r === 'ADMIN' || portal === 'ADMIN') {
-      setSelectedRole('ADMIN');
-    } else if (r === 'BUSINESS') {
-      setSelectedRole('BUSINESS');
-    } else if (r === 'INVESTOR') {
-      setSelectedRole('INVESTOR');
-    }
-  }, [searchParams]);
 
   const handleLogin = async (e?: React.FormEvent, customEmail?: string, customPassword?: string) => {
     if (e) e.preventDefault();
@@ -78,7 +54,7 @@ function LoginForm() {
             ? '/dashboard/investor'
             : '/onboarding/investor');
 
-        // Full browser navigation ensures the session cookie is dispatched reliably without router race conditions
+        // Full browser navigation ensures the session cookie is dispatched cleanly
         window.location.href = destination;
       } else {
         setError(data.error || 'Authentication failed. Please verify your credentials.');
@@ -115,9 +91,9 @@ function LoginForm() {
             </div>
             <span className="text-2xl font-bold tracking-tight text-slate-900">VESTIQ</span>
           </Link>
-          <h1 className="text-2xl font-extrabold text-slate-950">Welcome to Vestiq</h1>
+          <h1 className="text-2xl font-extrabold text-slate-950">Welcome Back</h1>
           <p className="mt-1 text-xs text-slate-500">
-            Sign in to access your specialized discovery, fundraising, or governance portal
+            Select your account portal to sign in to your workspace
           </p>
         </div>
 
@@ -132,7 +108,7 @@ function LoginForm() {
             }}
             className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${
               selectedRole === 'INVESTOR'
-                ? 'bg-blue-50/80 border-blue-600 shadow-sm ring-2 ring-blue-500/20 text-blue-950 font-semibold'
+                ? 'bg-blue-50/90 border-blue-600 shadow-sm ring-2 ring-blue-500/20 text-blue-950 font-bold'
                 : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
             }`}
           >
@@ -155,7 +131,7 @@ function LoginForm() {
             }}
             className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${
               selectedRole === 'BUSINESS'
-                ? 'bg-emerald-50/80 border-emerald-600 shadow-sm ring-2 ring-emerald-500/20 text-emerald-950 font-semibold'
+                ? 'bg-emerald-50/90 border-emerald-600 shadow-sm ring-2 ring-emerald-500/20 text-emerald-950 font-bold'
                 : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
             }`}
           >
@@ -178,7 +154,7 @@ function LoginForm() {
             }}
             className={`p-3 rounded-2xl border text-left transition flex flex-col justify-between ${
               selectedRole === 'ADMIN'
-                ? 'bg-amber-50/80 border-amber-600 shadow-sm ring-2 ring-amber-500/20 text-amber-950 font-semibold'
+                ? 'bg-amber-50/90 border-amber-600 shadow-sm ring-2 ring-amber-500/20 text-amber-950 font-bold'
                 : 'bg-white border-slate-200 hover:border-slate-300 text-slate-600'
             }`}
           >
@@ -195,42 +171,42 @@ function LoginForm() {
 
         {/* Executive Quick Access Desks (Shown when Executive Admin tab is active) */}
         {selectedRole === 'ADMIN' && (
-          <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-lg mb-6 text-white space-y-3">
+          <div className="p-5 bg-slate-900 rounded-3xl border border-slate-800 shadow-xl mb-6 text-white space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5 text-amber-400" /> Executive Leadership 1-Click Desks
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                <Shield className="w-4 h-4 text-amber-400" /> Executive Leadership 1-Click Desks
               </span>
               <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-semibold border border-amber-500/30">
-                Direct Access
+                Direct Sign In
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {/* Founder Desk: BOLLOJU BHANU TEJA */}
               <button
                 type="button"
                 onClick={() => handleExecutiveQuickAccess('FOUNDER')}
                 disabled={loading}
-                className="p-3 rounded-xl border border-blue-500/40 bg-blue-950/60 hover:bg-blue-900/80 text-left transition relative group"
+                className="p-3.5 rounded-2xl border border-blue-500/40 bg-blue-950/70 hover:bg-blue-900 text-left transition relative group shadow-md"
               >
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-md bg-blue-600 text-white flex items-center justify-center font-bold text-[10px]">
+                    <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
                       BT
                     </div>
                     <span className="text-[10px] font-bold uppercase text-blue-300 tracking-wider">
                       Founder Admin
                     </span>
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-blue-400 group-hover:translate-x-1 transition" />
+                  <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition" />
                 </div>
-                <div className="font-bold text-white text-xs truncate">
+                <div className="font-extrabold text-white text-xs truncate">
                   BOLLOJU BHANU TEJA
                 </div>
-                <p className="text-[10px] text-blue-300/80 mt-0.5">
+                <p className="text-[10px] text-blue-300 mt-0.5">
                   Core Tech &amp; Legal Deeds
                 </p>
-                <span className="mt-2 block text-[10px] text-emerald-400 font-semibold border-t border-slate-800 pt-1">
+                <span className="mt-2.5 block text-[11px] text-emerald-400 font-bold border-t border-slate-800 pt-1.5">
                   1-Click Sign In &rarr;
                 </span>
               </button>
@@ -240,26 +216,26 @@ function LoginForm() {
                 type="button"
                 onClick={() => handleExecutiveQuickAccess('COFOUNDER')}
                 disabled={loading}
-                className="p-3 rounded-xl border border-emerald-500/40 bg-emerald-950/60 hover:bg-emerald-900/80 text-left transition relative group"
+                className="p-3.5 rounded-2xl border border-emerald-500/40 bg-emerald-950/70 hover:bg-emerald-900 text-left transition relative group shadow-md"
               >
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-md bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px]">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
                       BH
                     </div>
                     <span className="text-[10px] font-bold uppercase text-emerald-300 tracking-wider">
                       Co-Founder Admin
                     </span>
                   </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-emerald-400 group-hover:translate-x-1 transition" />
+                  <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition" />
                 </div>
-                <div className="font-bold text-white text-xs truncate">
+                <div className="font-extrabold text-white text-xs truncate">
                   BHAVANA
                 </div>
-                <p className="text-[10px] text-emerald-300/80 mt-0.5">
+                <p className="text-[10px] text-emerald-300 mt-0.5">
                   Operations &amp; Diligence
                 </p>
-                <span className="mt-2 block text-[10px] text-emerald-400 font-semibold border-t border-slate-800 pt-1">
+                <span className="mt-2.5 block text-[11px] text-emerald-400 font-bold border-t border-slate-800 pt-1.5">
                   1-Click Sign In &rarr;
                 </span>
               </button>
@@ -289,14 +265,14 @@ function LoginForm() {
                 ? 'Investor Sign In'
                 : selectedRole === 'BUSINESS'
                 ? 'Startup & Business Sign In'
-                : 'Executive Admin Sign In'}
+                : 'Executive Admin Credentials'}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
               {selectedRole === 'INVESTOR'
                 ? 'Enter your credentials to explore opportunities and diligence vaults'
                 : selectedRole === 'BUSINESS'
                 ? 'Access your funding campaign, investor inquiries and executed deeds'
-                : 'Sign in to access platform governance and deal review'}
+                : 'Or sign in with administrative email and password'}
             </p>
           </div>
 
@@ -374,7 +350,7 @@ function LoginForm() {
               <>
                 New investor on Vestiq?{' '}
                 <Link
-                  href="/register?role=investor"
+                  href="/register"
                   className="text-blue-600 font-semibold hover:underline"
                 >
                   Create Investor Account &rarr;
@@ -385,7 +361,7 @@ function LoginForm() {
               <>
                 Raising capital for your business?{' '}
                 <Link
-                  href="/register?role=business"
+                  href="/register"
                   className="text-emerald-600 font-semibold hover:underline"
                 >
                   Register Your Startup &rarr;
@@ -394,38 +370,45 @@ function LoginForm() {
             )}
             {selectedRole === 'ADMIN' && (
               <>
-                Need to access public account?{' '}
+                Switch to general user login:{' '}
                 <button
                   type="button"
                   onClick={() => setSelectedRole('INVESTOR')}
-                  className="text-blue-600 font-semibold hover:underline"
+                  className="text-blue-600 font-semibold hover:underline ml-1"
                 >
-                  Switch to Standard Portals &rarr;
+                  Investor
+                </button>
+                {' • '}
+                <button
+                  type="button"
+                  onClick={() => setSelectedRole('BUSINESS')}
+                  className="text-emerald-600 font-semibold hover:underline"
+                >
+                  Startup
                 </button>
               </>
             )}
           </div>
         </div>
 
+        {/* Quick Footer Access to Admin Desk */}
+        {selectedRole !== 'ADMIN' && (
+          <div className="mt-5 text-center">
+            <button
+              type="button"
+              onClick={() => setSelectedRole('ADMIN')}
+              className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-amber-700 font-medium transition"
+            >
+              <Shield className="w-3.5 h-3.5 text-amber-600" /> Executive Leadership Desk (Founder &amp; Co-Founder) &rarr;
+            </button>
+          </div>
+        )}
+
         {/* Bottom Tagline */}
-        <p className="mt-5 text-[11px] text-slate-400 text-center leading-relaxed">
+        <p className="mt-4 text-[11px] text-slate-400 text-center leading-relaxed">
           Vestiq • Institutional B2B Business Investment &amp; Partnership Discovery
         </p>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="py-24 text-center">
-          <p className="text-xs text-slate-500">Loading sign in portal...</p>
-        </div>
-      }
-    >
-      <LoginForm />
-    </Suspense>
   );
 }

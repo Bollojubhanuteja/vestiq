@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Compass,
   Briefcase,
@@ -34,16 +33,8 @@ const INDUSTRIES_LIST = [
   'Other',
 ];
 
-function RegisterForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const getRoleFromQuery = (): 'INVESTOR' | 'BUSINESS' => {
-    const q = searchParams.get('role')?.toUpperCase();
-    return q === 'BUSINESS' ? 'BUSINESS' : 'INVESTOR';
-  };
-
-  const [role, setRole] = useState<'INVESTOR' | 'BUSINESS'>(getRoleFromQuery());
+export default function RegisterPage() {
+  const [role, setRole] = useState<'INVESTOR' | 'BUSINESS'>('INVESTOR');
   const [name, setName] = useState('');
   const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('Technology');
@@ -57,15 +48,18 @@ function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Sync role when URL searchParams changes
+  // Read URL query params on client mount without triggering Next.js Suspense bailout
   useEffect(() => {
-    const qRole = searchParams.get('role')?.toUpperCase();
-    if (qRole === 'BUSINESS') {
-      setRole('BUSINESS');
-    } else if (qRole === 'INVESTOR') {
-      setRole('INVESTOR');
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const qRole = params.get('role')?.toUpperCase();
+      if (qRole === 'BUSINESS') {
+        setRole('BUSINESS');
+      } else if (qRole === 'INVESTOR') {
+        setRole('INVESTOR');
+      }
     }
-  }, [searchParams]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -380,28 +374,14 @@ function RegisterForm() {
           <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-500">
             Already registered on Vestiq?{' '}
             <Link
-              href={`/login?role=${role.toLowerCase()}`}
+              href="/login"
               className="text-blue-600 font-semibold hover:underline"
             >
-              Sign In as {role === 'INVESTOR' ? 'Investor' : 'Business'} &rarr;
+              Sign In to Your Account &rarr;
             </Link>
           </div>
         </div>
       </div>
     </div>
-  );
-}
-
-export default function RegisterPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="py-24 text-center">
-          <p className="text-xs text-slate-500">Loading registration form...</p>
-        </div>
-      }
-    >
-      <RegisterForm />
-    </Suspense>
   );
 }
