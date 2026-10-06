@@ -17,7 +17,7 @@ export default function AdminLoginPage() {
     setLoading(true);
     setError(null);
 
-    const emailToSend = customEmail || email;
+    const emailToSend = (customEmail || email).toLowerCase().trim();
     const passwordToSend = customPassword || password;
 
     try {
@@ -31,25 +31,32 @@ export default function AdminLoginPage() {
 
       if (res.ok) {
         if (data.user.role === 'ADMIN') {
-          router.push('/admin');
+          // Direct full browser navigation ensures cookies are recognized by middleware
+          window.location.href = '/admin';
         } else {
           setError('Access restricted. This account does not possess Executive Admin privileges.');
+          setLoading(false);
         }
-        router.refresh();
       } else {
         setError(data.error || 'Authentication failed. Please check administrative credentials.');
+        setLoading(false);
       }
     } catch {
       setError('Network connection error. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
 
-  const handleFounderQuickAccess = () => {
-    setEmail('vestiq21@gmail.com');
-    setPassword('Vestiq@Launch2026!');
-    handleLogin(undefined, 'vestiq21@gmail.com', 'Vestiq@Launch2026!');
+  const handleExecutiveQuickAccess = (type: 'FOUNDER' | 'COFOUNDER') => {
+    if (type === 'FOUNDER') {
+      setEmail('vestiq21@gmail.com');
+      setPassword('Vestiq@Launch2026!');
+      handleLogin(undefined, 'vestiq21@gmail.com', 'Vestiq@Launch2026!');
+    } else {
+      setEmail('bhavana@vestiq.com');
+      setPassword('Vestiq@Bhavana2026!');
+      handleLogin(undefined, 'bhavana@vestiq.com', 'Vestiq@Bhavana2026!');
+    }
   };
 
   return (
@@ -61,7 +68,7 @@ export default function AdminLoginPage() {
             href="/login"
             className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Return to Investor &amp; Business Login
+            <ArrowLeft className="w-3.5 h-3.5" /> Return to Standard User Login
           </Link>
         </div>
 
@@ -76,40 +83,68 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        {/* 1-Click Founder Desk */}
-        <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl mb-6">
-          <div className="flex items-center justify-between mb-3">
+        {/* 1-Click Executive Desks */}
+        <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl mb-6 space-y-3">
+          <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Founder Quick Desk
+              Executive Leadership 1-Click Desks
             </span>
             <span className="text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-              Executive
+              Direct Access
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={handleFounderQuickAccess}
-            disabled={loading}
-            className="w-full p-3 rounded-xl border border-blue-500/30 bg-blue-950/40 hover:bg-blue-900/60 text-left transition group relative overflow-hidden"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                  BT
+          <div className="space-y-2.5">
+            {/* Founder Desk */}
+            <button
+              type="button"
+              onClick={() => handleExecutiveQuickAccess('FOUNDER')}
+              disabled={loading}
+              className="w-full p-3 rounded-xl border border-blue-500/30 bg-blue-950/40 hover:bg-blue-900/60 text-left transition group relative overflow-hidden"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                    BT
+                  </div>
+                  <div>
+                    <div className="font-bold text-white text-xs">BOLLOJU BHANU TEJA</div>
+                    <div className="text-[11px] text-blue-300">Founder &amp; Managing Director</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-bold text-white text-xs">BOLLOJU BHANU TEJA</div>
-                  <div className="text-[11px] text-blue-300">Founder &amp; Managing Director</div>
-                </div>
+                <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition" />
               </div>
-              <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition" />
-            </div>
-            <div className="mt-2 text-[10px] text-slate-400 border-t border-slate-800/80 pt-1.5 flex items-center justify-between">
-              <span>Core Tech • Legal Deeds • Admin Oversight</span>
-              <span className="text-emerald-400 font-medium">1-Click Sign In &rarr;</span>
-            </div>
-          </button>
+              <div className="mt-2 text-[10px] text-slate-400 border-t border-slate-800/80 pt-1.5 flex items-center justify-between">
+                <span>Core Tech • Legal Deeds • Admin Oversight</span>
+                <span className="text-emerald-400 font-medium">1-Click Sign In &rarr;</span>
+              </div>
+            </button>
+
+            {/* Co-Founder Desk */}
+            <button
+              type="button"
+              onClick={() => handleExecutiveQuickAccess('COFOUNDER')}
+              disabled={loading}
+              className="w-full p-3 rounded-xl border border-emerald-500/30 bg-emerald-950/40 hover:bg-emerald-900/60 text-left transition group relative overflow-hidden"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                    BH
+                  </div>
+                  <div>
+                    <div className="font-bold text-white text-xs">BHAVANA</div>
+                    <div className="text-[11px] text-emerald-300">Co-Founder &amp; Head of Operations</div>
+                  </div>
+                </div>
+                <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition" />
+              </div>
+              <div className="mt-2 text-[10px] text-slate-400 border-t border-slate-800/80 pt-1.5 flex items-center justify-between">
+                <span>Operations • Diligence Verification • Investor Relations</span>
+                <span className="text-emerald-400 font-medium">1-Click Sign In &rarr;</span>
+              </div>
+            </button>
+          </div>
         </div>
 
         {/* Admin Login Form */}
@@ -133,7 +168,7 @@ export default function AdminLoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@vestiq.com"
+                  placeholder="vestiq21@gmail.com"
                   className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-700 bg-slate-950 text-white text-xs placeholder-slate-500 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition"
                 />
               </div>
@@ -159,7 +194,7 @@ export default function AdminLoginPage() {
               disabled={loading}
               className="w-full py-3 bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs shadow-lg shadow-amber-600/20 transition mt-2 flex items-center justify-center gap-1.5"
             >
-              {loading ? 'Authenticating Executive...' : 'Sign In to Admin Oversight Portal'}
+              {loading ? 'Authenticating & Navigating...' : 'Sign In to Admin Oversight Portal'}
             </button>
           </form>
 

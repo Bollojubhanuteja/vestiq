@@ -52,11 +52,21 @@ export async function POST(req: NextRequest) {
     // Track analytics
     await trackEvent('REGISTRATION', user.id, null, { action: 'LOGIN', role: user.role });
 
+    const redirectUrl =
+      user.role === 'ADMIN'
+        ? '/admin'
+        : user.role === 'BUSINESS'
+        ? '/dashboard/business'
+        : user.investorProfile?.onboardingCompleted
+        ? '/dashboard/investor'
+        : '/onboarding/investor';
+
     const response = NextResponse.json({
       success: true,
       user: sessionPayload,
       onboardingCompleted:
         user.role === 'INVESTOR' ? !!user.investorProfile?.onboardingCompleted : true,
+      redirectUrl,
     });
 
     response.cookies.set({
