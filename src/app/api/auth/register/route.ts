@@ -12,6 +12,9 @@ const registerSchema = z.object({
   phone: z.string().optional(),
   country: z.string().default('India'),
   city: z.string().optional(),
+  companyName: z.string().optional(),
+  industry: z.string().optional(),
+  fundingRequirement: z.number().optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -26,7 +29,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, password, role, phone, country, city } = parsed.data;
+    const { name, email, password, role, phone, country, city, companyName, industry, fundingRequirement } = parsed.data;
     const normalizedEmail = email.toLowerCase().trim();
 
     const existingUser = await db.user.findUnique({
@@ -54,7 +57,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // If investor, create initial profile shell
+    // If investor, create initial profile shell and preference record
     if (role === 'INVESTOR') {
       const invProfile = await db.investorProfile.create({
         data: {
@@ -78,6 +81,46 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // If business/startup, initialize their BusinessProfile
+    if (role === 'BUSINESS') {
+      const resolvedCompany = companyName?.trim() || `${name}'s Venture`;
+      const resolvedCity = city?.trim() || 'India';
+      const resolvedIndustry = industry || 'Technology';
+
+      await db.businessProfile.create({
+        data: {
+          userId: user.id,
+          companyName: resolvedCompany,
+          founderName: name,
+          email: normalizedEmail,
+          phone: phone || null,
+          country: country || 'India',
+          city: resolvedCity,
+          industry: resolvedIndustry,
+          businessStage: 'Seed',
+          yearsOperating: 1,
+          teamSize: 2,
+          businessDescription: `${resolvedCompany} is an Indian growth venture seeking strategic capital and active investor partnerships on Vestiq.`,
+          problem: 'Market demand requires dedicated growth funding and structured expansion capital.',
+          solution: 'Proprietary product/service offering backed by committed promoter execution.',
+          businessModel: 'B2B & Commercial Operations',
+          revenueStatus: 'Pre-revenue',
+          profitabilityStatus: 'Early Stage',
+          fundingRequirement: fundingRequirement || 2500000,
+          intendedUseOfFunds: 'Product development, team expansion, operational infrastructure, and working capital.',
+          investmentModel: 'EQUITY',
+          minimumInvestment: 200000,
+          valuation: 20000000,
+          equityOffered: 12.5,
+          preMoneyValuation: 17500000,
+          postMoneyValuation: 20000000,
+          status: 'DRAFT',
+          verificationStatus: 'NOT_REVIEWED',
+          isPublished: false,
+        },
+      });
+    }
+
     const sessionPayload = {
       userId: user.id,
       email: user.email,
@@ -87,12 +130,13 @@ export async function POST(req: NextRequest) {
 
     const token = await signToken(sessionPayload);
 
-    await trackEvent('REGISTRATION', user.id, null, { role: user.role });
+    await trackEvent('REGISTRATION', user.id, null, { role: user.role, company: companyName || null });
 
     const response = NextResponse.json({
       success: true,
       user: sessionPayload,
       requiresOnboarding: role === 'INVESTOR',
+      redirectUrl: role === 'INVESTOR' ? '/onboarding/investor' : '/dashboard/business',
     });
 
     response.cookies.set({

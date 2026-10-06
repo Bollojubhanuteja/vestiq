@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -14,18 +14,40 @@ import {
   MapPin,
   Phone,
   AlertCircle,
-  CheckCircle2
+  CheckCircle2,
+  Building2,
+  Layers,
+  Coins
 } from 'lucide-react';
+
+const INDUSTRIES_LIST = [
+  'Technology',
+  'AI & Robotics',
+  'CleanTech & EV',
+  'HealthTech',
+  'AgriTech',
+  'FinTech',
+  'Logistics & Supply Chain',
+  'Manufacturing',
+  'Consumer & D2C',
+  'Education',
+  'Other',
+];
 
 function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialRole = (searchParams.get('role')?.toUpperCase() === 'BUSINESS' ? 'BUSINESS' : 'INVESTOR') as
-    | 'INVESTOR'
-    | 'BUSINESS';
 
-  const [role, setRole] = useState<'INVESTOR' | 'BUSINESS'>(initialRole);
+  const getRoleFromQuery = (): 'INVESTOR' | 'BUSINESS' => {
+    const q = searchParams.get('role')?.toUpperCase();
+    return q === 'BUSINESS' ? 'BUSINESS' : 'INVESTOR';
+  };
+
+  const [role, setRole] = useState<'INVESTOR' | 'BUSINESS'>(getRoleFromQuery());
   const [name, setName] = useState('');
+  const [companyName, setCompanyName] = useState('');
+  const [industry, setIndustry] = useState('Technology');
+  const [fundingRequirement, setFundingRequirement] = useState<number>(2500000);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
@@ -35,10 +57,25 @@ function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Sync role when URL searchParams changes
+  useEffect(() => {
+    const qRole = searchParams.get('role')?.toUpperCase();
+    if (qRole === 'BUSINESS') {
+      setRole('BUSINESS');
+    } else if (qRole === 'INVESTOR') {
+      setRole('INVESTOR');
+    }
+  }, [searchParams]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreeTerms) {
       setError('You must acknowledge the Risk Disclosure and Terms of Service to create an account.');
+      return;
+    }
+
+    if (role === 'BUSINESS' && !companyName.trim()) {
+      setError('Please provide your Startup / Company Name.');
       return;
     }
 
@@ -50,31 +87,31 @@ function RegisterForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
-          email,
+          name: name.trim(),
+          email: email.trim(),
           password,
           role,
-          phone,
+          phone: phone.trim() || undefined,
           country,
-          city,
+          city: city.trim() || undefined,
+          companyName: role === 'BUSINESS' ? companyName.trim() : undefined,
+          industry: role === 'BUSINESS' ? industry : undefined,
+          fundingRequirement: role === 'BUSINESS' ? Number(fundingRequirement) : undefined,
         }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        if (role === 'INVESTOR') {
-          router.push('/onboarding/investor');
-        } else {
-          router.push('/dashboard/business');
-        }
-        router.refresh();
+        // Full browser navigation ensures session cookies are recognized reliably
+        const destination = data.redirectUrl || (role === 'INVESTOR' ? '/onboarding/investor' : '/dashboard/business');
+        window.location.href = destination;
       } else {
         setError(data.error || 'Registration failed. Please check inputs.');
+        setLoading(false);
       }
     } catch {
       setError('Network connection error. Please try again.');
-    } finally {
       setLoading(false);
     }
   };
@@ -84,15 +121,22 @@ function RegisterForm() {
       <div className="max-w-lg w-full">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-sm">
+          <Link href="/" className="inline-flex items-center gap-2 mb-4 group">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 group-hover:bg-blue-700 text-white font-bold text-xl shadow-sm flex items-center justify-center transition">
               V
             </div>
             <span className="text-2xl font-bold tracking-tight text-slate-900">VESTIQ</span>
           </Link>
-          <h1 className="text-2xl font-extrabold text-slate-950">Create Your Account</h1>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-2 bg-slate-200 text-slate-700">
+            {role === 'BUSINESS' ? 'Startup & SME Capital Gateway' : 'Accredited Investor Portal'}
+          </div>
+          <h1 className="text-2xl font-extrabold text-slate-950">
+            {role === 'BUSINESS' ? 'Register Your Startup' : 'Create Investor Account'}
+          </h1>
           <p className="mt-1 text-xs text-slate-500">
-            Select your account type to access standardized discovery tools
+            {role === 'BUSINESS'
+              ? 'Create your verified company profile to connect with accredited Indian angel investors & debt capital'
+              : 'Select your account type to access standardized deal discovery and due diligence tools'}
           </p>
         </div>
 
@@ -103,7 +147,7 @@ function RegisterForm() {
             onClick={() => setRole('INVESTOR')}
             className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between ${
               role === 'INVESTOR'
-                ? 'bg-blue-50/60 border-blue-500 shadow-sm ring-1 ring-blue-500'
+                ? 'bg-blue-50/70 border-blue-500 shadow-sm ring-1 ring-blue-500'
                 : 'bg-white border-slate-200 hover:border-slate-300'
             }`}
           >
@@ -124,7 +168,7 @@ function RegisterForm() {
             onClick={() => setRole('BUSINESS')}
             className={`p-4 rounded-2xl border text-left transition flex flex-col justify-between ${
               role === 'BUSINESS'
-                ? 'bg-emerald-50/60 border-emerald-500 shadow-sm ring-1 ring-emerald-500'
+                ? 'bg-emerald-50/70 border-emerald-500 shadow-sm ring-1 ring-emerald-500'
                 : 'bg-white border-slate-200 hover:border-slate-300'
             }`}
           >
@@ -133,16 +177,16 @@ function RegisterForm() {
               {role === 'BUSINESS' && <CheckCircle2 className="w-4 h-4 text-emerald-600" />}
             </div>
             <div>
-              <span className="font-bold text-xs text-slate-900 block">I am a Business / Founder</span>
+              <span className="font-bold text-xs text-slate-900 block">I am a Business / Startup</span>
               <span className="text-[11px] text-slate-500 block mt-0.5">
-                Submit profile for administrative review
+                Raise capital &amp; connect with investors
               </span>
             </div>
           </button>
         </div>
 
         {/* Registration Form */}
-        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+        <div className="bg-white p-7 sm:p-8 rounded-3xl border border-slate-200 shadow-sm">
           {error && (
             <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs mb-5 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
@@ -151,8 +195,30 @@ function RegisterForm() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Startup Specific Field: Company Name */}
+            {role === 'BUSINESS' && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Startup / Company Name *
+                </label>
+                <div className="relative">
+                  <Building2 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="e.g. Acme Robotics Technologies Pvt Ltd"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                  />
+                </div>
+              </div>
+            )}
+
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Full Legal Name *</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                {role === 'BUSINESS' ? 'Founder / Legal Representative Full Name *' : 'Full Legal Name *'}
+              </label>
               <div className="relative">
                 <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -161,13 +227,61 @@ function RegisterForm() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Vikram Mehta"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 transition"
                 />
               </div>
             </div>
 
+            {/* Startup Specific: Industry & Target Capital */}
+            {role === 'BUSINESS' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Industry / Sector *
+                  </label>
+                  <div className="relative">
+                    <Layers className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <select
+                      value={industry}
+                      onChange={(e) => setIndustry(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 bg-white"
+                    >
+                      {INDUSTRIES_LIST.map((ind) => (
+                        <option key={ind} value={ind}>
+                          {ind}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Target Capital (₹ INR) *
+                  </label>
+                  <div className="relative">
+                    <Coins className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <select
+                      value={fundingRequirement}
+                      onChange={(e) => setFundingRequirement(Number(e.target.value))}
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-emerald-500 bg-white"
+                    >
+                      <option value={1500000}>₹15 Lakhs</option>
+                      <option value={2500000}>₹25 Lakhs</option>
+                      <option value={5000000}>₹50 Lakhs</option>
+                      <option value={10000000}>₹1 Crore</option>
+                      <option value={20000000}>₹2 Crores</option>
+                      <option value={50000000}>₹5 Crores</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address *</label>
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                {role === 'BUSINESS' ? 'Work / Business Email Address *' : 'Email Address *'}
+              </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -175,8 +289,8 @@ function RegisterForm() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500"
+                  placeholder={role === 'BUSINESS' ? 'founder@yourcompany.com' : 'investor@example.com'}
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 transition"
                 />
               </div>
             </div>
@@ -194,7 +308,7 @@ function RegisterForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 transition"
                 />
               </div>
             </div>
@@ -209,20 +323,20 @@ function RegisterForm() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+91 98765 43210"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 transition"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">City</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">City / Headquarters</label>
                 <div className="relative">
                   <MapPin className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder="e.g. Mumbai, Bengaluru"
-                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g. Hyderabad, Bengaluru"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-blue-500 transition"
                   />
                 </div>
               </div>
@@ -249,9 +363,17 @@ function RegisterForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-sm transition mt-3 flex items-center justify-center gap-1.5"
+              className={`w-full py-3 text-white rounded-xl text-xs font-semibold shadow-sm transition mt-3 flex items-center justify-center gap-1.5 ${
+                role === 'BUSINESS'
+                  ? 'bg-emerald-600 hover:bg-emerald-700'
+                  : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
-              {loading ? 'Creating Account...' : `Register as ${role === 'INVESTOR' ? 'Investor' : 'Startup'}`}
+              {loading
+                ? 'Creating Account...'
+                : role === 'BUSINESS'
+                ? 'Register Your Startup →'
+                : 'Register as Investor →'}
             </button>
           </form>
 
@@ -283,4 +405,3 @@ export default function RegisterPage() {
     </Suspense>
   );
 }
-
