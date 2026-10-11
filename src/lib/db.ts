@@ -8,6 +8,13 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function initDatabaseUrl(): string {
+  const envUrl = process.env.DATABASE_URL;
+
+  // 1. If an external persistent database is configured (e.g. hosted PostgreSQL, remote libSQL), prioritize it immediately
+  if (envUrl && !envUrl.startsWith('file:') && !envUrl.includes('./dev.db')) {
+    return envUrl;
+  }
+
   const isServerless = process.env.VERCEL === '1' || Boolean(process.env.AWS_LAMBDA_FUNCTION_NAME);
 
   if (isServerless) {
@@ -46,7 +53,7 @@ function initDatabaseUrl(): string {
     return resolvedUrl;
   }
 
-  return process.env.DATABASE_URL || 'file:./dev.db';
+  return envUrl || 'file:./dev.db';
 }
 
 const dbUrl = initDatabaseUrl();

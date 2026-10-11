@@ -8,7 +8,9 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "seed": "node prisma/seed.js",
-    "test": "node scripts/test-runner.js"
+    "test": "node scripts/test-runner.js",
+    "db:use:postgres": "node scripts/switch-db.js postgres",
+    "db:use:sqlite": "node scripts/switch-db.js sqlite"
   },
   "keywords": [
     "investment-research",
