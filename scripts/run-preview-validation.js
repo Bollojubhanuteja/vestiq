@@ -51,6 +51,11 @@ async function run() {
   const isNotFallback = PREVIEW_SECRET !== 'vestiq-dev-jwt-super-secret-key-32-chars-long-minimum-secure';
   assert(hasJwtSecret && isNotFallback, `Preview environment has cryptographically secure JWT_SECRET configured (length: ${PREVIEW_SECRET.length} chars, non-fallback, value suppressed)`);
 
+  // Ensure isolated preview database exists
+  const previewDbPath = path.join(process.cwd(), 'prisma', 'preview.db');
+  const sourceDbPath = path.join(process.cwd(), 'prisma', 'dev.db');
+  fs.copyFileSync(sourceDbPath, previewDbPath);
+
   // 2. Spawn isolated Next.js preview server
   console.log(`\nLaunching isolated Preview server on port ${PREVIEW_PORT} with database file:./preview.db...`);
   const serverProcess = spawn('npx', ['next', 'start', '-p', String(PREVIEW_PORT)], {
