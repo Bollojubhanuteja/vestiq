@@ -8,8 +8,18 @@ const db = new PrismaClient();
 async function main() {
   console.log('--- Seeding Institutional B2B Investment Platform Data ---');
 
-  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_DESTRUCTIVE_DB_WIPE !== 'true') {
-    throw new Error('SAFETY BLOCKED: Refusing to wipe and seed database in production without ALLOW_DESTRUCTIVE_DB_WIPE=true');
+  const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+  const dbUrl = process.env.DATABASE_URL || '';
+  const isRemoteDb = dbUrl && !dbUrl.startsWith('file:') && !dbUrl.includes('dev.db');
+
+  if (isProd || isRemoteDb) {
+    if (process.env.ALLOW_DESTRUCTIVE_DB_WIPE !== 'true') {
+      throw new Error(
+        `SAFETY BLOCKED: Refusing to wipe and seed database in production or unverified remote environment (${
+          isProd ? 'production environment' : 'remote database URL detected'
+        }) without explicit ALLOW_DESTRUCTIVE_DB_WIPE=true`
+      );
+    }
   }
 
   // 1. Clean previous records cleanly

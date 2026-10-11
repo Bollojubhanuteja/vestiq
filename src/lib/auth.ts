@@ -3,11 +3,26 @@ import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 
-const JWT_SECRET_STRING = process.env.JWT_SECRET || 'vestiq-dev-jwt-super-secret-key-32-chars-long-minimum-secure';
-if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-  console.warn('[SECURITY WARNING] Production running with default fallback JWT_SECRET. Please configure JWT_SECRET in your production environment settings.');
+const DEV_FALLBACK_SECRET = 'vestiq-dev-jwt-super-secret-key-32-chars-long-minimum-secure';
+
+export function getJwtSecretKey(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+
+  if (!secret) {
+    if (isProduction) {
+      throw new Error('[SECURITY FATAL] JWT_SECRET is not configured in production environment. Refusing to operate with fallback credentials.');
+    }
+    return new TextEncoder().encode(DEV_FALLBACK_SECRET);
+  }
+
+  if (isProduction && secret === DEV_FALLBACK_SECRET) {
+    throw new Error('[SECURITY FATAL] Insecure default development JWT_SECRET is used in production. A cryptographically secure production secret is required.');
+  }
+
+  return new TextEncoder().encode(secret);
 }
-const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_STRING);
+
 const COOKIE_NAME = 'vestiq_session';
 
 export interface SessionUser {
@@ -27,16 +42,18 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export async function signToken(payload: SessionUser): Promise<string> {
+  const secretKey = getJwtSecretKey();
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(JWT_SECRET);
+    .sign(secretKey);
 }
 
 export async function verifyToken(token: string): Promise<SessionUser | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const secretKey = getJwtSecretKey();
+    const { payload } = await jwtVerify(token, secretKey);
     return {
       userId: payload.userId as string,
       email: payload.email as string,

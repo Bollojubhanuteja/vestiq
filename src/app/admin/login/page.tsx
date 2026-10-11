@@ -47,28 +47,6 @@ export default function AdminLoginPage() {
     }
   };
 
-  const handleExecutiveQuickAccess = async (type: 'FOUNDER' | 'COFOUNDER') => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/auth/executive-access', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ desk: type }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        window.location.href = data.redirectUrl || '/admin';
-      } else {
-        setError(data.error || 'Executive authentication failed.');
-        setLoading(false);
-      }
-    } catch {
-      setError('Network connection error. Please try again.');
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="py-16 md:py-24 bg-slate-950 min-h-screen flex items-center justify-center px-4 text-white">
       <div className="max-w-md w-full">
@@ -91,70 +69,6 @@ export default function AdminLoginPage() {
           <p className="mt-1.5 text-xs text-slate-400">
             Administrative governance &amp; verified opportunity diligence
           </p>
-        </div>
-
-        {/* 1-Click Executive Desks */}
-        <div className="p-4 bg-slate-900/90 rounded-2xl border border-slate-800 shadow-xl mb-6 space-y-3">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Executive Leadership 1-Click Desks
-            </span>
-            <span className="text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-              Direct Access
-            </span>
-          </div>
-
-          <div className="space-y-2.5">
-            {/* Founder Desk */}
-            <button
-              type="button"
-              onClick={() => handleExecutiveQuickAccess('FOUNDER')}
-              disabled={loading}
-              className="w-full p-3 rounded-xl border border-blue-500/30 bg-blue-950/40 hover:bg-blue-900/60 text-left transition group relative overflow-hidden"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                    BT
-                  </div>
-                  <div>
-                    <div className="font-bold text-white text-xs">BOLLOJU BHANU TEJA</div>
-                    <div className="text-[11px] text-blue-300">Founder &amp; Managing Director</div>
-                  </div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition" />
-              </div>
-              <div className="mt-2 text-[10px] text-slate-400 border-t border-slate-800/80 pt-1.5 flex items-center justify-between">
-                <span>Core Tech • Legal Deeds • Admin Oversight</span>
-                <span className="text-emerald-400 font-medium">1-Click Sign In &rarr;</span>
-              </div>
-            </button>
-
-            {/* Co-Founder Desk */}
-            <button
-              type="button"
-              onClick={() => handleExecutiveQuickAccess('COFOUNDER')}
-              disabled={loading}
-              className="w-full p-3 rounded-xl border border-emerald-500/30 bg-emerald-950/40 hover:bg-emerald-900/60 text-left transition group relative overflow-hidden"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                    BH
-                  </div>
-                  <div>
-                    <div className="font-bold text-white text-xs">BHAVANA</div>
-                    <div className="text-[11px] text-emerald-300">Co-Founder &amp; Head of Operations</div>
-                  </div>
-                </div>
-                <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition" />
-              </div>
-              <div className="mt-2 text-[10px] text-slate-400 border-t border-slate-800/80 pt-1.5 flex items-center justify-between">
-                <span>Operations • Diligence Verification • Investor Relations</span>
-                <span className="text-emerald-400 font-medium">1-Click Sign In &rarr;</span>
-              </div>
-            </button>
-          </div>
         </div>
 
         {/* Admin Login Form */}

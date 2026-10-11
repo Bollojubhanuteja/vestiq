@@ -82,32 +82,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleExecutiveQuickAccess = async (type: 'FOUNDER' | 'COFOUNDER') => {
-    setLoading(true);
-    setError(null);
-    setStatusMessage('Authenticating executive desk...');
-    try {
-      const res = await fetch('/api/auth/executive-access', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ desk: type }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setStatusMessage('Executive authenticated! Navigating to Admin console...');
-        window.location.href = data.redirectUrl || '/admin';
-      } else {
-        setError(data.error || 'Executive authentication failed.');
-        setStatusMessage(null);
-        setLoading(false);
-      }
-    } catch {
-      setError('Network connection error. Please try again.');
-      setStatusMessage(null);
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="py-12 md:py-20 bg-slate-50 min-h-screen flex items-center justify-center px-4">
       <div className="max-w-lg w-full">
@@ -197,77 +171,23 @@ export default function LoginPage() {
           </button>
         </div>
 
-        {/* Executive Quick Access Desks (Shown when Executive Admin tab is active) */}
+        {/* Executive Admin Information Banner */}
         {selectedRole === 'ADMIN' && (
-          <div className="p-5 bg-slate-900 rounded-3xl border border-slate-800 shadow-xl mb-6 text-white space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                <Shield className="w-4 h-4 text-amber-400" /> Executive Leadership 1-Click Desks
-              </span>
-              <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-semibold border border-amber-500/30">
-                Direct Sign In
-              </span>
+          <div className="p-4 bg-slate-900 rounded-2xl border border-slate-800 shadow-md mb-6 text-white flex items-center justify-between gap-3">
+            <div>
+              <div className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                <Shield className="w-4 h-4 text-amber-400" /> Executive Leadership Portal
+              </div>
+              <p className="text-[11px] text-slate-300 mt-0.5">
+                Elevated privileges require verified administrative credentials.
+              </p>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Founder Desk: BOLLOJU BHANU TEJA */}
-              <button
-                type="button"
-                onClick={() => handleExecutiveQuickAccess('FOUNDER')}
-                disabled={loading}
-                className="p-3.5 rounded-2xl border border-blue-500/40 bg-blue-950/70 hover:bg-blue-900 text-left transition relative group shadow-md"
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
-                      BT
-                    </div>
-                    <span className="text-[10px] font-bold uppercase text-blue-300 tracking-wider">
-                      Founder Admin
-                    </span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition" />
-                </div>
-                <div className="font-extrabold text-white text-xs truncate">
-                  BOLLOJU BHANU TEJA
-                </div>
-                <p className="text-[10px] text-blue-300 mt-0.5">
-                  Core Tech &amp; Legal Deeds
-                </p>
-                <span className="mt-2.5 block text-[11px] text-emerald-400 font-bold border-t border-slate-800 pt-1.5">
-                  1-Click Sign In &rarr;
-                </span>
-              </button>
-
-              {/* Co-Founder Desk: BHAVANA */}
-              <button
-                type="button"
-                onClick={() => handleExecutiveQuickAccess('COFOUNDER')}
-                disabled={loading}
-                className="p-3.5 rounded-2xl border border-emerald-500/40 bg-emerald-950/70 hover:bg-emerald-900 text-left transition relative group shadow-md"
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs">
-                      BH
-                    </div>
-                    <span className="text-[10px] font-bold uppercase text-emerald-300 tracking-wider">
-                      Co-Founder Admin
-                    </span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition" />
-                </div>
-                <div className="font-extrabold text-white text-xs truncate">
-                  BHAVANA
-                </div>
-                <p className="text-[10px] text-emerald-300 mt-0.5">
-                  Operations &amp; Diligence
-                </p>
-                <span className="mt-2.5 block text-[11px] text-emerald-400 font-bold border-t border-slate-800 pt-1.5">
-                  1-Click Sign In &rarr;
-                </span>
-              </button>
-            </div>
+            <Link
+              href="/admin/login"
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shrink-0 transition flex items-center gap-1"
+            >
+              Admin Portal &rarr;
+            </Link>
           </div>
         )}
 

@@ -1,8 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
-const JWT_SECRET_STRING = process.env.JWT_SECRET || 'vestiq-dev-jwt-super-secret-key-32-chars-long-minimum-secure';
-const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_STRING);
+const DEV_FALLBACK_SECRET = 'vestiq-dev-jwt-super-secret-key-32-chars-long-minimum-secure';
+
+function getMiddlewareJwtSecretKey(): Uint8Array | null {
+  const secret = process.env.JWT_SECRET;
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+
+  if (!secret) {
+    if (isProduction) {
+      console.error('[SECURITY FATAL] JWT_SECRET missing in production middleware. Access denied.');
+      return null;
+    }
+    return new TextEncoder().encode(DEV_FALLBACK_SECRET);
+  }
+
+  if (isProduction && secret === DEV_FALLBACK_SECRET) {
+    console.error('[SECURITY FATAL] Insecure default development JWT_SECRET used in production middleware. Access denied.');
+    return null;
+  }
+
+  return new TextEncoder().encode(secret);
+}
+
 const COOKIE_NAME = 'vestiq_session';
 
 export async function middleware(req: NextRequest) {
@@ -20,13 +40,21 @@ export async function middleware(req: NextRequest) {
   const token = req.cookies.get(COOKIE_NAME)?.value;
 
   if (!token) {
-    const loginUrl = new URL('/login', req.url);
+    const loginUrl = new URL(isAdminRoute ? '/admin/login' : '/login', req.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
+  const secretKey = getMiddlewareJwtSecretKey();
+  if (!secretKey) {
+    // Fail closed in production if secret is not properly configured
+    const loginUrl = new URL(isAdminRoute ? '/admin/login' : '/login', req.url);
+    loginUrl.searchParams.set('error', 'security_config_missing');
+    return NextResponse.redirect(loginUrl);
+  }
+
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, secretKey);
     const role = payload.role as string;
 
     // Admin access

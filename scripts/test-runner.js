@@ -84,6 +84,20 @@ async function runTests() {
   console.log('    VESTIQ PLATFORM - AUTOMATED VERIFICATION SUITE  ');
   console.log('====================================================\n');
 
+  const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+  const dbUrl = process.env.DATABASE_URL || '';
+  const isRemoteDb = dbUrl && !dbUrl.startsWith('file:') && !dbUrl.includes('dev.db');
+
+  if (isProd || isRemoteDb) {
+    if (process.env.ALLOW_TEST_EXECUTION_ON_REMOTE !== 'true') {
+      throw new Error(
+        `SAFETY BLOCKED: Refusing to execute test suite against production or unverified remote database (${
+          isProd ? 'production environment' : 'remote database URL detected'
+        }) without explicit ALLOW_TEST_EXECUTION_ON_REMOTE=true`
+      );
+    }
+  }
+
   let passed = 0;
   let failed = 0;
   const cleanupUserIds = [];

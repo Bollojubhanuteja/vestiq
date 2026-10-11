@@ -8,8 +8,18 @@ const db = new PrismaClient();
 async function main() {
   console.log('--- Cleaning all sample data from Vestiq Database ---');
 
-  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_DESTRUCTIVE_DB_WIPE !== 'true') {
-    throw new Error('SAFETY BLOCKED: Refusing to wipe database in production without ALLOW_DESTRUCTIVE_DB_WIPE=true');
+  const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+  const dbUrl = process.env.DATABASE_URL || '';
+  const isRemoteDb = dbUrl && !dbUrl.startsWith('file:') && !dbUrl.includes('dev.db');
+
+  if (isProd || isRemoteDb) {
+    if (process.env.ALLOW_DESTRUCTIVE_DB_WIPE !== 'true') {
+      throw new Error(
+        `SAFETY BLOCKED: Refusing to wipe database in production or unverified remote environment (${
+          isProd ? 'production environment' : 'remote database URL detected'
+        }) without explicit ALLOW_DESTRUCTIVE_DB_WIPE=true`
+      );
+    }
   }
 
   // 1. Delete all sample records across all relations

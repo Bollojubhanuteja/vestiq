@@ -6,6 +6,20 @@ const db = new PrismaClient();
 async function main() {
   console.log('--- Seeding Vestiq Database with realistic test demo data ---');
 
+  const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+  const dbUrl = process.env.DATABASE_URL || '';
+  const isRemoteDb = dbUrl && !dbUrl.startsWith('file:') && !dbUrl.includes('dev.db');
+
+  if (isProd || isRemoteDb) {
+    if (process.env.ALLOW_DESTRUCTIVE_DB_WIPE !== 'true') {
+      throw new Error(
+        `SAFETY BLOCKED: Refusing to seed database in production or unverified remote environment (${
+          isProd ? 'production environment' : 'remote database URL detected'
+        }) without explicit ALLOW_DESTRUCTIVE_DB_WIPE=true`
+      );
+    }
+  }
+
   // Clean old test data
   await db.auditLog.deleteMany({});
   await db.riskFlag.deleteMany({});
