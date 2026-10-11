@@ -8,6 +8,10 @@ const db = new PrismaClient();
 async function main() {
   console.log('--- Cleaning all sample data from Vestiq Database ---');
 
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_DESTRUCTIVE_DB_WIPE !== 'true') {
+    throw new Error('SAFETY BLOCKED: Refusing to wipe database in production without ALLOW_DESTRUCTIVE_DB_WIPE=true');
+  }
+
   // 1. Delete all sample records across all relations
   await db.investmentMessage.deleteMany({});
   await db.investmentAgreement.deleteMany({});

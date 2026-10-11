@@ -8,7 +8,8 @@ export type AnalyticsEventType =
   | 'WATCHLIST_ADD'
   | 'WATCHLIST_REMOVE'
   | 'COMPARISON_USE'
-  | 'INFO_REQUEST';
+  | 'INFO_REQUEST'
+  | 'EXECUTIVE_ACCESS';
 
 export async function trackEvent(
   eventType: AnalyticsEventType,

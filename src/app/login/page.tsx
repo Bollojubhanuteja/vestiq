@@ -82,15 +82,29 @@ export default function LoginPage() {
     }
   };
 
-  const handleExecutiveQuickAccess = (type: 'FOUNDER' | 'COFOUNDER') => {
-    if (type === 'FOUNDER') {
-      setEmail('vestiq21@gmail.com');
-      setPassword('Vestiq@Launch2026!');
-      handleLogin(undefined, 'vestiq21@gmail.com', 'Vestiq@Launch2026!');
-    } else {
-      setEmail('bhavana@vestiq.com');
-      setPassword('Vestiq@Bhavana2026!');
-      handleLogin(undefined, 'bhavana@vestiq.com', 'Vestiq@Bhavana2026!');
+  const handleExecutiveQuickAccess = async (type: 'FOUNDER' | 'COFOUNDER') => {
+    setLoading(true);
+    setError(null);
+    setStatusMessage('Authenticating executive desk...');
+    try {
+      const res = await fetch('/api/auth/executive-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ desk: type }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setStatusMessage('Executive authenticated! Navigating to Admin console...');
+        window.location.href = data.redirectUrl || '/admin';
+      } else {
+        setError(data.error || 'Executive authentication failed.');
+        setStatusMessage(null);
+        setLoading(false);
+      }
+    } catch {
+      setError('Network connection error. Please try again.');
+      setStatusMessage(null);
+      setLoading(false);
     }
   };
 

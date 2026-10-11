@@ -4,6 +4,9 @@ import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 
 const JWT_SECRET_STRING = process.env.JWT_SECRET || 'vestiq-dev-jwt-super-secret-key-32-chars-long-minimum-secure';
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  console.warn('[SECURITY WARNING] Production running with default fallback JWT_SECRET. Please configure JWT_SECRET in your production environment settings.');
+}
 const JWT_SECRET = new TextEncoder().encode(JWT_SECRET_STRING);
 const COOKIE_NAME = 'vestiq_session';
 
