@@ -9,17 +9,14 @@ async function main() {
   console.log('--- Cleaning all sample data from Vestiq Database ---');
 
   const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+  if (isProd) {
+    throw new Error('SAFETY BLOCKED: Destructive database operations are strictly prohibited in production under all circumstances, including when override flags are set.');
+  }
+
   const dbUrl = process.env.DATABASE_URL || '';
   const isRemoteDb = dbUrl && !dbUrl.startsWith('file:') && !dbUrl.includes('dev.db');
-
-  if (isProd || isRemoteDb) {
-    if (process.env.ALLOW_DESTRUCTIVE_DB_WIPE !== 'true') {
-      throw new Error(
-        `SAFETY BLOCKED: Refusing to wipe database in production or unverified remote environment (${
-          isProd ? 'production environment' : 'remote database URL detected'
-        }) without explicit ALLOW_DESTRUCTIVE_DB_WIPE=true`
-      );
-    }
+  if (isRemoteDb && process.env.ALLOW_DESTRUCTIVE_DB_WIPE !== 'true') {
+    throw new Error('SAFETY BLOCKED: Refusing to wipe remote database without explicit ALLOW_DESTRUCTIVE_DB_WIPE=true');
   }
 
   // 1. Delete all sample records across all relations

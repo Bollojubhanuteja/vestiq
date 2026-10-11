@@ -85,17 +85,14 @@ async function runTests() {
   console.log('====================================================\n');
 
   const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+  if (isProd) {
+    throw new Error('SAFETY BLOCKED: Test suite execution is strictly prohibited in production under all circumstances, including when override flags are set.');
+  }
+
   const dbUrl = process.env.DATABASE_URL || '';
   const isRemoteDb = dbUrl && !dbUrl.startsWith('file:') && !dbUrl.includes('dev.db');
-
-  if (isProd || isRemoteDb) {
-    if (process.env.ALLOW_TEST_EXECUTION_ON_REMOTE !== 'true') {
-      throw new Error(
-        `SAFETY BLOCKED: Refusing to execute test suite against production or unverified remote database (${
-          isProd ? 'production environment' : 'remote database URL detected'
-        }) without explicit ALLOW_TEST_EXECUTION_ON_REMOTE=true`
-      );
-    }
+  if (isRemoteDb && process.env.ALLOW_TEST_EXECUTION_ON_REMOTE !== 'true') {
+    throw new Error('SAFETY BLOCKED: Refusing to execute test suite against remote database without explicit ALLOW_TEST_EXECUTION_ON_REMOTE=true');
   }
 
   let passed = 0;

@@ -168,9 +168,29 @@ async function runValidation() {
       "`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
       assert(true, `${name} refuses execution in production mode and throws SAFETY BLOCKED`);
     } catch (err) {
-      // If process exited with code 0 and output matched, or if child threw non-zero, let's verify
       const errOut = (err.stdout || '') + (err.stderr || '');
       assert(errOut.includes('SAFETY_BLOCKED_OK') || err.message.includes('SAFETY BLOCKED'), `${name} refuses execution in production mode`);
+    }
+
+    // Verify that running with NODE_ENV=production STILL throws SAFETY BLOCKED even WITH override flag set
+    try {
+      execSync(`node -e "
+        process.env.NODE_ENV = 'production';
+        process.env.ALLOW_DESTRUCTIVE_DB_WIPE = 'true';
+        process.env.ALLOW_TEST_EXECUTION_ON_REMOTE = 'true';
+        try {
+          require('./${file.replace(/\\/g, '/')}');
+        } catch(e) {
+          if (e.message.includes('SAFETY BLOCKED')) {
+            console.log('SAFETY_BLOCKED_OVERRIDE_REFUSED');
+            process.exit(0);
+          }
+        }
+      "`, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+      assert(true, `${name} refuses execution in production EVEN WITH override flag set`);
+    } catch (err) {
+      const errOut = (err.stdout || '') + (err.stderr || '');
+      assert(errOut.includes('SAFETY_BLOCKED_OVERRIDE_REFUSED') || err.message.includes('SAFETY BLOCKED'), `${name} refuses execution in production EVEN WITH override flag set`);
     }
   }
 
