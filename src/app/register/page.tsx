@@ -374,10 +374,10 @@ export default function RegisterPage() {
           <div className="mt-6 pt-5 border-t border-slate-100 text-center text-xs text-slate-500">
             Already registered on Vestiq?{' '}
             <Link
-              href="/login"
+              href={role === 'BUSINESS' ? '/login?role=business' : '/login?role=investor'}
               className="text-blue-600 font-semibold hover:underline"
             >
-              Sign In to Your Account &rarr;
+              Sign In to Your {role === 'BUSINESS' ? 'Startup' : 'Investor'} Account &rarr;
             </Link>
           </div>
         </div>

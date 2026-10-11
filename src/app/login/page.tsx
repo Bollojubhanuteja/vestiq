@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Lock,
@@ -23,6 +23,20 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const qRole = params.get('role')?.toUpperCase();
+      if (qRole === 'BUSINESS' || qRole === 'STARTUP') {
+        setSelectedRole('BUSINESS');
+      } else if (qRole === 'ADMIN') {
+        setSelectedRole('ADMIN');
+      } else if (qRole === 'INVESTOR') {
+        setSelectedRole('INVESTOR');
+      }
+    }
+  }, []);
 
   const handleLogin = async (e?: React.FormEvent, customEmail?: string, customPassword?: string) => {
     if (e) e.preventDefault();
@@ -350,7 +364,7 @@ export default function LoginPage() {
               <>
                 New investor on Vestiq?{' '}
                 <Link
-                  href="/register"
+                  href="/register?role=investor"
                   className="text-blue-600 font-semibold hover:underline"
                 >
                   Create Investor Account &rarr;
@@ -361,7 +375,7 @@ export default function LoginPage() {
               <>
                 Raising capital for your business?{' '}
                 <Link
-                  href="/register"
+                  href="/register?role=business"
                   className="text-emerald-600 font-semibold hover:underline"
                 >
                   Register Your Startup &rarr;
@@ -369,38 +383,30 @@ export default function LoginPage() {
               </>
             )}
             {selectedRole === 'ADMIN' && (
-              <>
-                Switch to general user login:{' '}
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole('INVESTOR')}
-                  className="text-blue-600 font-semibold hover:underline ml-1"
+              <div className="space-y-2">
+                <p>
+                  Looking for the dedicated full-screen administrative console?
+                </p>
+                <Link
+                  href="/admin/login"
+                  className="inline-flex items-center gap-1.5 text-amber-600 font-bold hover:underline"
                 >
-                  Investor
-                </button>
-                {' • '}
-                <button
-                  type="button"
-                  onClick={() => setSelectedRole('BUSINESS')}
-                  className="text-emerald-600 font-semibold hover:underline"
-                >
-                  Startup
-                </button>
-              </>
+                  <Shield className="w-3.5 h-3.5" /> Open Dedicated Executive Portal &rarr;
+                </Link>
+              </div>
             )}
           </div>
         </div>
 
         {/* Quick Footer Access to Admin Desk */}
         {selectedRole !== 'ADMIN' && (
-          <div className="mt-5 text-center">
-            <button
-              type="button"
-              onClick={() => setSelectedRole('ADMIN')}
+          <div className="mt-5 text-center flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/admin/login"
               className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-amber-700 font-medium transition"
             >
-              <Shield className="w-3.5 h-3.5 text-amber-600" /> Executive Leadership Desk (Founder &amp; Co-Founder) &rarr;
-            </button>
+              <Shield className="w-3.5 h-3.5 text-amber-600" /> Executive Portal (Founder &amp; Co-Founder Desks) &rarr;
+            </Link>
           </div>
         )}
 

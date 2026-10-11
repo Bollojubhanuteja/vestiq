@@ -159,8 +159,7 @@ export default function InvestorOnboardingPage() {
       const data = await res.json();
 
       if (res.ok) {
-        router.push('/dashboard/investor');
-        router.refresh();
+        window.location.href = '/dashboard/investor';
       } else {
         setError(data.error || 'Failed to complete onboarding.');
       }
@@ -562,13 +561,22 @@ export default function InvestorOnboardingPage() {
             ) : <div />}
 
             {step < 5 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl transition flex items-center gap-1 shadow-sm"
-              >
-                Continue <ChevronRight className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleCompleteOnboarding}
+                  className="text-xs text-slate-500 hover:text-slate-800 font-medium underline"
+                >
+                  Skip &amp; Enter Dashboard &rarr;
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl transition flex items-center gap-1 shadow-sm"
+                >
+                  Continue <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             ) : (
               <button
                 type="button"
